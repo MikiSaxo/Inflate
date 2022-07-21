@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 
@@ -10,25 +11,41 @@ public class Manager : MonoBehaviour
     int actualgrow = 10;
     bool someoneLose, hasChooseNbPlayers;
     [SerializeField] TextMeshProUGUI[] choosenNb;
-    [SerializeField] GameObject balloon, prefabPlayers, parentPlayers, validateButtonNb;
+    [SerializeField] GameObject balloon, textHPlayers, prefabPlayers, parentPlayers, validateButtonNb;
     [SerializeField] PlayerData[] playersData;
 
     [SerializeField] List<GameObject> stockPlayers = new List<GameObject>();
 
     [SerializeField] int nbDeMancheScoreMode = 5;
+
     [Header("Random number for Balloon")]
     [SerializeField] int minBalloon;
     [SerializeField] int maxBalloon;
 
+    [Header("Buttons Colors")]
+    [SerializeField] Color[] colorsButtons;
+    [SerializeField] Image[] imgButtonsNotPress;
+    [SerializeField] Image[] imgButtonsPress;
+    const float timeToEnterHoverColorButtons = .2f;
+    const float timeToExitHoverColorButtons = .1f;
+    const float timeForAClickButton = .1f;
+
+    [Header("Game Mode")]
+    public GameMode gameMode;
+
     private void Start()
     {
-        ChooseRandomNb();
         choosenNumber = 1;
+
+        for (int i = 0; i < imgButtonsNotPress.Length; i++)
+        {
+            imgButtonsNotPress[i].color = colorsButtons[0];
+        }
     }
 
     void ChooseRandomNb()
     {
-        randomNumber = Random.Range(minBalloon, maxBalloon);
+        randomNumber = Random.Range(minBalloon, maxBalloon * nbOfPlayers);
         print("randomNumber : " + randomNumber);
     }
 
@@ -37,9 +54,6 @@ public class Manager : MonoBehaviour
         Score,
         Melee
     }
-
-    [Header("Game Mode")]
-    public GameMode gameMode;
 
     public void OnClickPlus()
     {
@@ -93,9 +107,8 @@ public class Manager : MonoBehaviour
             choosenNumber = 1;
         }
         else
-        {
             SpawnPlayers(nbOfPlayers);
-        }
+
         ActualizeChoosenNb();
     }
 
@@ -117,7 +130,7 @@ public class Manager : MonoBehaviour
     {
         actualgrow += HowManyToGrow;
         float convertGrow = actualgrow;
-        convertGrow /= 10;
+        convertGrow /= 8;
         //print("convertGrow : " + convertGrow);
         Vector3 grow = new Vector3(convertGrow, convertGrow, convertGrow);
         balloon.transform.localScale = grow;
@@ -180,6 +193,7 @@ public class Manager : MonoBehaviour
 
     void SpawnPlayers(int nbOfPlayers)
     {
+        ChooseRandomNb();
         for (int i = 0; i < nbOfPlayers; i++)
         {
             GameObject go = Instantiate(prefabPlayers, parentPlayers.transform);
@@ -194,17 +208,49 @@ public class Manager : MonoBehaviour
             }
             go.GetComponent<PlayerHimself>().LaunchMovePlayer(i);
         }
+
         hasChooseNbPlayers = true;
         balloon.SetActive(true);
+        textHPlayers.SetActive(false);
+
         ActualizeChoosenNb();
         StartCoroutine(LaunchTurnGame());
     }
 
     IEnumerator LaunchTurnGame()
     {
-        validateButtonNb.SetActive(false);
-        yield return new WaitForSeconds(2f);
         validateButtonNb.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        validateButtonNb.SetActive(false);
         ChangeTurn();
+    }
+
+    public void OnPointerEnter(int whichButton)
+    {
+        if (whichButton == 0)
+            imgButtonsNotPress[whichButton].DOColor(colorsButtons[1], timeToEnterHoverColorButtons);
+        else
+            imgButtonsNotPress[whichButton].DOColor(colorsButtons[2], timeToEnterHoverColorButtons);
+    }
+
+    public void OnPointerExit(int whichButton)
+    {
+        imgButtonsNotPress[whichButton].DOColor(colorsButtons[0], timeToExitHoverColorButtons);
+    }
+
+    public void OnPointerClick(int whichButton)
+    {
+        StartCoroutine(MakeAClick(whichButton));
+    }
+
+    IEnumerator MakeAClick(int whichButton)
+    {
+        imgButtonsNotPress[whichButton].gameObject.SetActive(false);
+        imgButtonsPress[whichButton].gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(timeForAClickButton);
+
+        imgButtonsNotPress[whichButton].gameObject.SetActive(true);
+        imgButtonsPress[whichButton].gameObject.SetActive(false);
     }
 }
