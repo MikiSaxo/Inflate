@@ -37,10 +37,10 @@ public class Manager : MonoBehaviour
     {
         choosenNumber = 1;
 
-        for (int i = 0; i < imgButtonsNotPress.Length; i++)
-        {
-            imgButtonsNotPress[i].color = colorsButtons[0];
-        }
+        //for (int i = 0; i < imgButtonsNotPress.Length; i++)
+        //{
+        //    imgButtonsNotPress[i].color = colorsButtons[0];
+        //}
     }
 
     void ChooseRandomNb()
@@ -225,18 +225,18 @@ public class Manager : MonoBehaviour
         ChangeTurn();
     }
 
-    public void OnPointerEnter(int whichButton)
-    {
-        if (whichButton == 0)
-            imgButtonsNotPress[whichButton].DOColor(colorsButtons[1], timeToEnterHoverColorButtons);
-        else
-            imgButtonsNotPress[whichButton].DOColor(colorsButtons[2], timeToEnterHoverColorButtons);
-    }
+    //public void OnPointerEnter(int whichButton)
+    //{
+    //    if (whichButton == 0)
+    //        imgButtonsNotPress[whichButton].DOColor(colorsButtons[1], timeToEnterHoverColorButtons);
+    //    else
+    //        imgButtonsNotPress[whichButton].DOColor(colorsButtons[2], timeToEnterHoverColorButtons);
+    //}
 
-    public void OnPointerExit(int whichButton)
-    {
-        imgButtonsNotPress[whichButton].DOColor(colorsButtons[0], timeToExitHoverColorButtons);
-    }
+    //public void OnPointerExit(int whichButton)
+    //{
+    //    imgButtonsNotPress[whichButton].DOColor(colorsButtons[0], timeToExitHoverColorButtons);
+    //}
 
     public void OnPointerClick(int whichButton)
     {
