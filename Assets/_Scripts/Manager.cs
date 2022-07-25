@@ -11,7 +11,7 @@ public class Manager : MonoBehaviour
     int actualgrow = 10;
     bool someoneLose, hasChooseNbPlayers;
     [SerializeField] TextMeshProUGUI[] choosenNb;
-    [SerializeField] GameObject balloon, textHPlayers, prefabPlayers, parentPlayers, validateButtonNb;
+    [SerializeField] GameObject balloon, textHPlayers, prefabPlayers, parentPlayers, validateGreyButtonNb;
     [SerializeField] PlayerData[] playersData;
 
     [SerializeField] List<GameObject> stockPlayers = new List<GameObject>();
@@ -26,6 +26,8 @@ public class Manager : MonoBehaviour
     [SerializeField] Color[] colorsButtons;
     [SerializeField] Image[] imgButtonsNotPress;
     [SerializeField] Image[] imgButtonsPress;
+    [SerializeField] GameObject[] buttonsNotPress;
+    [SerializeField] GameObject[] buttonsPress;
     const float timeToEnterHoverColorButtons = .2f;
     const float timeToExitHoverColorButtons = .1f;
     const float timeForAClickButton = .1f;
@@ -58,14 +60,14 @@ public class Manager : MonoBehaviour
     public void OnClickPlus()
     {
         if (hasChooseNbPlayers)
-        {
             choosenNumber++;
-        }
         else
         {
             if (nbOfPlayers > 6)
-                return;
+                nbOfPlayers = 0;
             nbOfPlayers++;
+            if (nbOfPlayers > 0)
+                validateGreyButtonNb.SetActive(false);
         }
         ActualizeChoosenNb();
     }
@@ -91,6 +93,9 @@ public class Manager : MonoBehaviour
 
     public void OnValidateNb()
     {
+        if (choosenNumber == 0 || nbOfPlayers == 0)
+            return;
+
         if (hasChooseNbPlayers)
         {
             actualNumber += choosenNumber;
@@ -219,9 +224,9 @@ public class Manager : MonoBehaviour
 
     IEnumerator LaunchTurnGame()
     {
-        validateButtonNb.SetActive(true);
+        validateGreyButtonNb.SetActive(true);
         yield return new WaitForSeconds(2f);
-        validateButtonNb.SetActive(false);
+        validateGreyButtonNb.SetActive(false);
         ChangeTurn();
     }
 
@@ -245,12 +250,16 @@ public class Manager : MonoBehaviour
 
     IEnumerator MakeAClick(int whichButton)
     {
-        imgButtonsNotPress[whichButton].gameObject.SetActive(false);
-        imgButtonsPress[whichButton].gameObject.SetActive(true);
+        //imgButtonsNotPress[whichButton].gameObject.SetActive(false);
+        //imgButtonsPress[whichButton].gameObject.SetActive(true);
+        buttonsNotPress[whichButton].gameObject.transform.DOScale(Vector3.zero, .001f);
+        buttonsPress[whichButton].gameObject.transform.DOScale(Vector3.one, .001f);
 
         yield return new WaitForSeconds(timeForAClickButton);
 
-        imgButtonsNotPress[whichButton].gameObject.SetActive(true);
-        imgButtonsPress[whichButton].gameObject.SetActive(false);
+        //imgButtonsNotPress[whichButton].gameObject.SetActive(true);
+        //imgButtonsPress[whichButton].gameObject.SetActive(false);
+        buttonsNotPress[whichButton].gameObject.transform.DOScale(Vector3.one, .001f);
+        buttonsPress[whichButton].gameObject.transform.DOScale(Vector3.zero, .001f);
     }
 }
