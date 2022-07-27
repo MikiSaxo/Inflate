@@ -7,172 +7,178 @@ using DG.Tweening;
 
 public class Manager : MonoBehaviour
 {
-    int randomNumber, choosenNumber, actualNumber, nbOfPlayers, whichTurn;
-    int actualgrow = 10;
-    bool someoneLose, hasChooseNbPlayers;
-    [SerializeField] TextMeshProUGUI[] choosenNb;
-    [SerializeField] GameObject balloon, textHPlayers, prefabPlayers, parentPlayers, validateGreyButtonNb;
-    [SerializeField] PlayerData[] playersData;
+    private int _randomNumber = 0;
+    private int _choosenNumber = 0;
+    private int _actualNumber = 0;
+    private int _nbOfPlayers = 0;
+    private int _whichTurn = 0;
+    private int _actualgrow = 10;
+    private bool someoneLose = false;
+    private bool hasChooseNbPlayers = false;
 
-    [SerializeField] List<GameObject> stockPlayers = new List<GameObject>();
+    [SerializeField] private TextMeshProUGUI[] choosenNb = null;
+    [SerializeField] private GameObject balloon = null;
+    [SerializeField] private GameObject textHPlayers = null;
+    [SerializeField] private GameObject prefabPlayers = null;
+    [SerializeField] private GameObject parentPlayers = null;
+    [SerializeField] private GameObject validateGreyButtonNb = null;
+
+    [SerializeField] private PlayerData[] playersData;
+
+    [SerializeField] private List<GameObject> stockPlayers = new List<GameObject>();
 
     [SerializeField] int nbDeMancheScoreMode = 5;
 
     [Header("Random number for Balloon")]
-    [SerializeField] int minBalloon;
-    [SerializeField] int maxBalloon;
+    [SerializeField] int minBalloon = 0;
+    [SerializeField] int maxBalloon = 0;
 
     [Header("Buttons Colors")]
-    [SerializeField] Color[] colorsButtons;
-    [SerializeField] Image[] imgButtonsNotPress;
-    [SerializeField] Image[] imgButtonsPress;
-    [SerializeField] GameObject[] buttonsNotPress;
-    [SerializeField] GameObject[] buttonsPress;
+    [SerializeField] private Color[] colorsButtons;
+    [SerializeField] private Image[] imgButtonsNotPress;
+    [SerializeField] private Image[] imgButtonsPress;
+    [SerializeField] private GameObject[] buttonsNotPress;
+    [SerializeField] private GameObject[] buttonsPress;
+
     const float timeToEnterHoverColorButtons = .2f;
     const float timeToExitHoverColorButtons = .1f;
     const float timeForAClickButton = .1f;
 
     [Header("Game Mode")]
     public GameMode gameMode;
-
-    private void Start()
-    {
-        choosenNumber = 1;
-
-        //for (int i = 0; i < imgButtonsNotPress.Length; i++)
-        //{
-        //    imgButtonsNotPress[i].color = colorsButtons[0];
-        //}
-    }
-
-    void ChooseRandomNb()
-    {
-        randomNumber = Random.Range(minBalloon, maxBalloon * nbOfPlayers);
-        print("randomNumber : " + randomNumber);
-    }
-
     public enum GameMode
     {
         Score,
         Melee
     }
 
+    private void Start()
+    {
+        _choosenNumber = 1;
+    }
+
+    private void ChooseRandomNb()
+    {
+        _randomNumber = Random.Range(minBalloon, maxBalloon * _nbOfPlayers);
+        print("randomNumber : " + _randomNumber);
+    }
+
     public void OnClickPlus()
     {
         if (hasChooseNbPlayers)
-            choosenNumber++;
+            _choosenNumber++;
         else
         {
-            if (nbOfPlayers > 6)
-                nbOfPlayers = 0;
-            nbOfPlayers++;
-            if (nbOfPlayers > 0)
+            if (_nbOfPlayers > 6)
+                _nbOfPlayers = 0;
+            _nbOfPlayers++;
+            if (_nbOfPlayers > 0)
                 validateGreyButtonNb.SetActive(false);
         }
         ActualizeChoosenNb();
     }
 
-    public void OnClickMinus()
-    {
-        if (hasChooseNbPlayers)
-        {
-            if (choosenNumber < 2)
-                return;
+    //public void OnClickMinus()
+    //{
+    //    if (hasChooseNbPlayers)
+    //    {
+    //        if (choosenNumber < 2)
+    //            return;
 
-            choosenNumber--;
-        }
-        else
-        {
-            if (nbOfPlayers < 1)
-                return;
+    //        choosenNumber--;
+    //    }
+    //    else
+    //    {
+    //        if (nbOfPlayers < 1)
+    //            return;
 
-            nbOfPlayers--;
-        }
-        ActualizeChoosenNb();
-    }
+    //        nbOfPlayers--;
+    //    }
+    //    ActualizeChoosenNb();
+    //}
 
     public void OnValidateNb()
     {
-        if (choosenNumber == 0 || nbOfPlayers == 0)
+        if (_choosenNumber == 0 || _nbOfPlayers == 0)
             return;
 
         if (hasChooseNbPlayers)
         {
-            actualNumber += choosenNumber;
-            if (actualNumber > randomNumber)
+            _actualNumber += _choosenNumber;
+            if (_actualNumber > _randomNumber)
             {
                 EndGame();
                 return;
             }
 
             if (gameMode == GameMode.Score)
-                stockPlayers[whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(choosenNumber);
+                stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
 
-            GrowBalloon(choosenNumber);
-            choosenNumber = 1;
+            GrowBalloon(_choosenNumber);
+            _choosenNumber = 1;
         }
         else
-            SpawnPlayers(nbOfPlayers);
+            SpawnPlayers(_nbOfPlayers);
 
         ActualizeChoosenNb();
     }
 
-    void ActualizeChoosenNb()
+    private void ActualizeChoosenNb()
     {
         if (hasChooseNbPlayers)
         {
-            choosenNb[0].text = choosenNumber.ToString();
-            choosenNb[1].text = choosenNumber.ToString();
+            choosenNb[0].text = _choosenNumber.ToString();
+            choosenNb[1].text = _choosenNumber.ToString();
         }
         else
         {
-            choosenNb[0].text = nbOfPlayers.ToString();
-            choosenNb[1].text = nbOfPlayers.ToString();
+            choosenNb[0].text = _nbOfPlayers.ToString();
+            choosenNb[1].text = _nbOfPlayers.ToString();
         }
     }
 
-    void GrowBalloon(int HowManyToGrow)
+    void GrowBalloon(int _howManyToGrow)
     {
-        actualgrow += HowManyToGrow;
-        float convertGrow = actualgrow;
-        convertGrow /= 8;
+        _actualgrow += _howManyToGrow;
+        float _convertGrow = _actualgrow;
+        _convertGrow /= 8;
         //print("convertGrow : " + convertGrow);
-        Vector3 grow = new Vector3(convertGrow, convertGrow, convertGrow);
-        balloon.transform.localScale = grow;
+        Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
+        balloon.transform.localScale = _grow;
         ChangeTurn();
     }
 
-    void ChangeTurn()
+    private void ChangeTurn()
     {
         if (!someoneLose)
         {
-            if (whichTurn > 0)
-                stockPlayers[whichTurn - 1].GetComponent<PlayerHimself>().MyTurnEnd();
+            if (_whichTurn > 0)
+                stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().MyTurnEnd();
         }
         else
         {
-            whichTurn--;
+            _whichTurn--;
             someoneLose = false;
         }
 
-        whichTurn++;
-        if (whichTurn > nbOfPlayers)
-            whichTurn = 1;
+        _whichTurn++;
+        if (_whichTurn > _nbOfPlayers)
+            _whichTurn = 1;
 
-        stockPlayers[whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
+        stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
     }
 
-    void ResetGame()
+    private void ResetGame()
     {
         balloon.transform.localScale = Vector3.one;
-        choosenNumber = 1;
-        actualNumber = 0;
+        _choosenNumber = 1;
+        _actualNumber = 0;
         ChooseRandomNb();
         ActualizeChoosenNb();
         ChangeTurn();
     }
 
-    void EndGame()
+    private void EndGame()
     {
         print("Lose");
         if (gameMode == GameMode.Score)
@@ -188,30 +194,26 @@ public class Manager : MonoBehaviour
             someoneLose = true;
             balloon.transform.localScale = Vector3.one;
 
-            stockPlayers[whichTurn - 1].SetActive(false);
-            stockPlayers.RemoveAt(whichTurn - 1);
-            nbOfPlayers--;
+            stockPlayers[_whichTurn - 1].SetActive(false);
+            stockPlayers.RemoveAt(_whichTurn - 1);
+            _nbOfPlayers--;
 
             ResetGame();
         }
     }
 
-    void SpawnPlayers(int nbOfPlayers)
+    private void SpawnPlayers(int nbOfPlayers)
     {
         ChooseRandomNb();
         for (int i = 0; i < nbOfPlayers; i++)
         {
             GameObject go = Instantiate(prefabPlayers, parentPlayers.transform);
             stockPlayers.Add(go);
-            go.GetComponent<PlayerHimself>().Name.text = playersData[i].Name;
-            go.GetComponent<PlayerHimself>().Name.color = playersData[i].Color;
-            go.GetComponent<PlayerHimself>().Contour.color = playersData[i].Color;
+
+            go.GetComponent<PlayerHimself>().Init(playersData[i].Name, playersData[i].Color, i);
+
             if (gameMode == GameMode.Score)
-            {
-                go.GetComponent<PlayerHimself>().ScoreMode.SetActive(true);
                 go.GetComponent<PlayerHimself>().ActualizeScore(0);
-            }
-            go.GetComponent<PlayerHimself>().LaunchMovePlayer(i);
         }
 
         hasChooseNbPlayers = true;
@@ -222,7 +224,7 @@ public class Manager : MonoBehaviour
         StartCoroutine(LaunchTurnGame());
     }
 
-    IEnumerator LaunchTurnGame()
+    private IEnumerator LaunchTurnGame()
     {
         validateGreyButtonNb.SetActive(true);
         yield return new WaitForSeconds(2f);
@@ -248,7 +250,7 @@ public class Manager : MonoBehaviour
         StartCoroutine(MakeAClick(whichButton));
     }
 
-    IEnumerator MakeAClick(int whichButton)
+    private IEnumerator MakeAClick(int whichButton)
     {
         //imgButtonsNotPress[whichButton].gameObject.SetActive(false);
         //imgButtonsPress[whichButton].gameObject.SetActive(true);

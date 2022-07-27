@@ -7,40 +7,57 @@ using DG.Tweening;
 
 public class PlayerHimself : MonoBehaviour
 {
-    int actualScore;
+    [SerializeField] private GameObject Visu = null;
+    [SerializeField] private TextMeshProUGUI Name = null;
+    [SerializeField] private Image Contour = null;
+    [SerializeField] private Image ContourScore = null;
+    [SerializeField] private int turnDecalage;
+    [SerializeField] private float timeTurnDecalage;
+    
+    private int actualScore;
+    private string namee;
 
-    public GameObject Visu, ScoreMode;
-    public TextMeshProUGUI Name;
-    public Image Contour;
-
-    [SerializeField] int turnDecalage;
-    [SerializeField] float timeTurnDecalage;
-
-    public void LaunchMovePlayer(float decalage)
+    public void Init(string _name, Color _color, float _decalage)
     {
-        StartCoroutine(MoveSpawnPlayer(decalage));
+        ActualizeName(_name);
+        ContourScore.color = _color;
+        Contour.color = _color;
+        Contour.DOFade(0, .01f);
+        LaunchMovePlayer(_decalage);
     }
 
-    IEnumerator MoveSpawnPlayer(float decalage)
+    private void LaunchMovePlayer(float _decalage)
     {
-        //print(decalage);
-        yield return new WaitForSeconds(.3f + decalage /5);
+        StartCoroutine(MoveSpawnPlayer(_decalage));
+    }
+
+    IEnumerator MoveSpawnPlayer(float _decalage)
+    {
+        yield return new WaitForSeconds(.3f + _decalage /5);
         Visu.transform.DOMoveY(Visu.transform.position.y - 160, 1f);
     }
 
     public void ItsMyTurn()
     {
         Visu.transform.DOMoveY(Visu.transform.position.y - turnDecalage, timeTurnDecalage);
+        Contour.DOFade(1f, .5f);
     }
 
     public void MyTurnEnd()
     {
         Visu.transform.DOMoveY(Visu.transform.position.y + turnDecalage, timeTurnDecalage);
+        Contour.DOFade(0, .5f);
     }
 
-    public void ActualizeScore(int score)
+    public void ActualizeScore(int _score)
     {
-        actualScore += score;
-        ScoreMode.GetComponent<TextMeshProUGUI>().text = actualScore.ToString();
+        actualScore += _score;
+        Name.text = $"{namee} : {_score}";
+    }
+
+    private void ActualizeName(string _name)
+    {
+        namee = _name;
+        ActualizeScore(actualScore);
     }
 }
