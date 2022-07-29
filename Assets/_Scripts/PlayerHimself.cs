@@ -13,9 +13,9 @@ public class PlayerHimself : MonoBehaviour
     [SerializeField] private Image ContourScore = null;
     [SerializeField] private int turnDecalage;
     [SerializeField] private float timeTurnDecalage;
-    
-    private int actualScore;
-    private string namee;
+
+    private int actualScore = 0;
+    private string namee = string.Empty;
 
     public void Init(string _name, Color _color, float _decalage)
     {
@@ -39,12 +39,14 @@ public class PlayerHimself : MonoBehaviour
 
     public void ItsMyTurn()
     {
+        Visu.transform.DOComplete();
         Visu.transform.DOMoveY(Visu.transform.position.y - turnDecalage, timeTurnDecalage);
         Contour.DOFade(1f, .5f);
     }
 
     public void MyTurnEnd()
     {
+        Visu.transform.DOComplete();
         Visu.transform.DOMoveY(Visu.transform.position.y + turnDecalage, timeTurnDecalage);
         Contour.DOFade(0, .5f);
     }

@@ -54,7 +54,7 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
-        _choosenNumber = 1;
+        _choosenNumber = 0;
     }
 
     private void ChooseRandomNb()
@@ -66,7 +66,16 @@ public class Manager : MonoBehaviour
     public void OnClickPlus()
     {
         if (hasChooseNbPlayers)
+        {
             _choosenNumber++;
+            _actualNumber ++;
+            if (_actualNumber > _randomNumber)
+            {
+                EndGame();
+                return;
+            }
+            GrowBalloon(1);
+        }
         else
         {
             if (_nbOfPlayers > 6)
@@ -99,23 +108,24 @@ public class Manager : MonoBehaviour
 
     public void OnValidateNb()
     {
-        if (_choosenNumber == 0 || _nbOfPlayers == 0)
+        if (_nbOfPlayers == 0)
             return;
 
         if (hasChooseNbPlayers)
         {
-            _actualNumber += _choosenNumber;
-            if (_actualNumber > _randomNumber)
-            {
-                EndGame();
-                return;
-            }
+            //_actualNumber += _choosenNumber;
+            //if (_actualNumber > _randomNumber)
+            //{
+            //    EndGame();
+            //    return;
+            //}
 
             if (gameMode == GameMode.Score)
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
 
-            GrowBalloon(_choosenNumber);
-            _choosenNumber = 1;
+            //GrowBalloon(_choosenNumber);
+            ChangeTurn();
+            _choosenNumber = 0;
         }
         else
             SpawnPlayers(_nbOfPlayers);
@@ -144,8 +154,9 @@ public class Manager : MonoBehaviour
         _convertGrow /= 8;
         //print("convertGrow : " + convertGrow);
         Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
-        balloon.transform.localScale = _grow;
-        ChangeTurn();
+        //balloon.transform.localScale = _grow;
+        balloon.transform.DOScale(_grow, .5f);
+        
     }
 
     private void ChangeTurn()
@@ -170,9 +181,13 @@ public class Manager : MonoBehaviour
 
     private void ResetGame()
     {
-        balloon.transform.localScale = Vector3.one;
-        _choosenNumber = 1;
+        balloon.transform.localScale = Vector3.zero;
+        balloon.transform.DOScale(Vector3.one, .5f);
+
+        _actualgrow = 10;
+        _choosenNumber = 0;
         _actualNumber = 0;
+
         ChooseRandomNb();
         ActualizeChoosenNb();
         ChangeTurn();
@@ -248,20 +263,16 @@ public class Manager : MonoBehaviour
     public void OnPointerClick(int whichButton)
     {
         StartCoroutine(MakeAClick(whichButton));
-    }
+    } //Relied to Buttons in UI
 
-    private IEnumerator MakeAClick(int whichButton)
+    private IEnumerator MakeAClick(int whichButton) //Animation for a click
     {
-        //imgButtonsNotPress[whichButton].gameObject.SetActive(false);
-        //imgButtonsPress[whichButton].gameObject.SetActive(true);
-        buttonsNotPress[whichButton].gameObject.transform.DOScale(Vector3.zero, .001f);
-        buttonsPress[whichButton].gameObject.transform.DOScale(Vector3.one, .001f);
+        buttonsNotPress[whichButton].gameObject.transform.localScale = Vector3.zero;
+        buttonsPress[whichButton].gameObject.transform.localScale = Vector3.one;
 
         yield return new WaitForSeconds(timeForAClickButton);
 
-        //imgButtonsNotPress[whichButton].gameObject.SetActive(true);
-        //imgButtonsPress[whichButton].gameObject.SetActive(false);
-        buttonsNotPress[whichButton].gameObject.transform.DOScale(Vector3.one, .001f);
-        buttonsPress[whichButton].gameObject.transform.DOScale(Vector3.zero, .001f);
+        buttonsNotPress[whichButton].gameObject.transform.localScale = Vector3.one;
+        buttonsPress[whichButton].gameObject.transform.localScale = Vector3.zero;
     }
 }
