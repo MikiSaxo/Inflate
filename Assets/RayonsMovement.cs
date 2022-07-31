@@ -8,7 +8,7 @@ public class RayonsMovement : MonoBehaviour
     private float zAngle = 0f;
     void Start()
     {
-        zAngle = Time.deltaTime * 2;
+        zAngle = Time.deltaTime * 3;
     }
 
     private void Update()
