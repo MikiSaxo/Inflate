@@ -15,6 +15,7 @@ public class Manager : MonoBehaviour
     private int _actualgrow = 10;
     private bool someoneLose = false;
     private bool hasChooseNbPlayers = false;
+    private bool cannotPressInflate = false;
 
     [SerializeField] private TextMeshProUGUI[] choosenNb = null;
     [SerializeField] private GameObject balloon = null;
@@ -24,10 +25,11 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject prefabPlayers = null;
     [SerializeField] private GameObject parentPlayers = null;
     [SerializeField] private GameObject validateGreyButtonNb = null;
+    [SerializeField] private GameObject inflateGreyButton = null;
 
     [SerializeField] private PlayerData[] playersData;
 
-    [SerializeField] private List<GameObject> stockPlayers = new List<GameObject>();
+    private List<GameObject> stockPlayers = new List<GameObject>();
 
     [SerializeField] int nbDeMancheScoreMode = 5;
 
@@ -37,13 +39,11 @@ public class Manager : MonoBehaviour
 
     [Header("Buttons Colors")]
     [SerializeField] private Color[] colorsButtons;
-    [SerializeField] private Image[] imgButtonsNotPress;
-    [SerializeField] private Image[] imgButtonsPress;
+    //[SerializeField] private Image[] imgButtonsNotPress;
+    //[SerializeField] private Image[] imgButtonsPress;
     [SerializeField] private GameObject[] buttonsNotPress;
     [SerializeField] private GameObject[] buttonsPress;
 
-    const float timeToEnterHoverColorButtons = .2f;
-    const float timeToExitHoverColorButtons = .1f;
     const float timeForAClickButton = .1f;
 
     [Header("Game Mode")]
@@ -58,6 +58,7 @@ public class Manager : MonoBehaviour
     {
         _choosenNumber = 0;
         textHPlayers.transform.DOScale(Vector3.one, .7f);
+        DesacInflatOrNot(false);
     }
 
     private void ChooseRandomNb()
@@ -68,10 +69,13 @@ public class Manager : MonoBehaviour
 
     public void OnClickPlus()
     {
+        if (cannotPressInflate)
+            return;
+
         if (hasChooseNbPlayers)
         {
             _choosenNumber++;
-            _actualNumber ++;
+            _actualNumber++;
             validateGreyButtonNb.SetActive(false);
 
             if (_actualNumber > _randomNumber)
@@ -120,17 +124,9 @@ public class Manager : MonoBehaviour
 
         if (hasChooseNbPlayers)
         {
-            //_actualNumber += _choosenNumber;
-            //if (_actualNumber > _randomNumber)
-            //{
-            //    EndGame();
-            //    return;
-            //}
-
             if (gameMode == GameMode.Score)
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
 
-            //GrowBalloon(_choosenNumber);
             ChangeTurn();
             _choosenNumber = 0;
         }
@@ -159,23 +155,21 @@ public class Manager : MonoBehaviour
         _actualgrow += _howManyToGrow;
         float _convertGrow = _actualgrow;
         _convertGrow /= 8;
-        //print("convertGrow : " + convertGrow);
         Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
-        //balloon.transform.localScale = _grow;
         balloon.transform.DOScale(_grow, .5f);
-        
+
     }
 
     private IEnumerator DisplayWhosTurn()
     {
-        //var _getPlayerColor = playersData[_whichTurn - 1].Color;
-        textHPlayers.GetComponent<TextMeshProUGUI>().text = $"</color=blue>J{_whichTurn}</color> {textDisplayTurn}";
+        textHPlayers.GetComponent<TextMeshProUGUI>().text = $"</color=blue>J{_whichTurn}</color> {textDisplayTurn}"; //la couleur marche pas
         textHPlayers.transform.DOComplete();
         textHPlayers.transform.DOScale(Vector3.one, .7f);
         yield return new WaitForSeconds(1.5f);
         textHPlayers.transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         yield return new WaitForSeconds(.3f);
         textHPlayers.transform.DOScale(Vector3.zero, .25f);
+        DesacInflatOrNot(false);
     }
 
     private void ChangeTurn()
@@ -200,10 +194,20 @@ public class Manager : MonoBehaviour
         StartCoroutine(DisplayWhosTurn());
     }
 
-    private void ResetGame()
+    private IEnumerator ResetGame()
     {
+        DesacInflatOrNot(true);
+        
+        yield return new WaitForSeconds(.1f);
+        
         balloon.transform.localScale = Vector3.zero;
+        ShakeAnim.Instance.StartShaking();
+        
+        yield return new WaitForSeconds(ShakeAnim.Instance.duration);
+        
+        DesacInflatOrNot(true);
         balloon.transform.DOScale(Vector3.one, .5f);
+
 
         _actualgrow = 10;
         _choosenNumber = 0;
@@ -211,7 +215,6 @@ public class Manager : MonoBehaviour
 
         ChooseRandomNb();
         ActualizeChoosenNb();
-        //StartCoroutine(DisplayWhosTurn());
         ChangeTurn();
     }
 
@@ -221,27 +224,36 @@ public class Manager : MonoBehaviour
         if (gameMode == GameMode.Score)
         {
             nbDeMancheScoreMode--;
+
             if (nbDeMancheScoreMode <= 0)
                 print("Fin dla game ScoreMode");
 
-            ResetGame();
+            StartCoroutine(ResetGame());
         }
         else if (gameMode == GameMode.Melee)
         {
             someoneLose = true;
             balloon.transform.localScale = Vector3.one;
 
-            stockPlayers[_whichTurn - 1].SetActive(false);
-            stockPlayers.RemoveAt(_whichTurn - 1);
+            StartCoroutine(MakePlayerMeleeDisappear());
             _nbOfPlayers--;
 
-            ResetGame();
+            StartCoroutine(ResetGame());
         }
+    }
+
+    IEnumerator MakePlayerMeleeDisappear()
+    {
+        stockPlayers[_whichTurn - 1].transform.DOMoveY(stockPlayers[_whichTurn - 1].transform.position.y + 2, .3f);
+        yield return new WaitForSeconds(.3f);
+        stockPlayers[_whichTurn - 1].SetActive(false);
+        stockPlayers.RemoveAt(_whichTurn - 1);
     }
 
     private void SpawnPlayers(int nbOfPlayers)
     {
         ChooseRandomNb();
+        DesacInflatOrNot(true);
         for (int i = 0; i < nbOfPlayers; i++)
         {
             GameObject go = Instantiate(prefabPlayers, parentPlayers.transform);
@@ -261,8 +273,9 @@ public class Manager : MonoBehaviour
         StartCoroutine(AnimDisappear());
 
         ActualizeChoosenNb();
-        StartCoroutine(LaunchTurnGame());
-        
+        validateGreyButtonNb.SetActive(true);
+
+
         //StartCoroutine(DisplayWhosTurn());
     }
 
@@ -271,16 +284,10 @@ public class Manager : MonoBehaviour
         textHPlayers.transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         yield return new WaitForSeconds(.3f);
         textHPlayers.transform.DOScale(Vector3.zero, .25f);
-        yield return new WaitForSeconds(.3f);
+        yield return new WaitForSeconds(.8f);
         ChangeTurn();
     }
 
-    private IEnumerator LaunchTurnGame()
-    {
-        validateGreyButtonNb.SetActive(true);
-        yield return new WaitForSeconds(2f);
-        validateGreyButtonNb.SetActive(false);
-    }
 
     //public void OnPointerEnter(int whichButton)
     //{
@@ -309,5 +316,11 @@ public class Manager : MonoBehaviour
 
         buttonsNotPress[whichButton].gameObject.transform.localScale = Vector3.one;
         buttonsPress[whichButton].gameObject.transform.localScale = Vector3.zero;
+    }
+
+    private void DesacInflatOrNot(bool _tellMe)
+    {
+        inflateGreyButton.SetActive(_tellMe);
+        cannotPressInflate = _tellMe;
     }
 }

@@ -11,11 +11,13 @@ public class PlayerHimself : MonoBehaviour
     [SerializeField] private TextMeshProUGUI Name = null;
     [SerializeField] private Image Contour = null;
     [SerializeField] private Image ContourScore = null;
-    [SerializeField] private int turnDecalage;
+    [SerializeField] private float turnDecalage;
     [SerializeField] private float timeTurnDecalage;
 
     private int actualScore = 0;
     private string namee = string.Empty;
+
+    const float _moveYSpawn = 1f;
 
     public void Init(string _name, Color _color, float _decalage)
     {
@@ -34,7 +36,7 @@ public class PlayerHimself : MonoBehaviour
     IEnumerator MoveSpawnPlayer(float _decalage)
     {
         yield return new WaitForSeconds(.3f + _decalage /5);
-        Visu.transform.DOMoveY(Visu.transform.position.y - 160, 1f);
+        Visu.transform.DOMoveY(Visu.transform.position.y - _moveYSpawn, 1f);
     }
 
     public void ItsMyTurn()

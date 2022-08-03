@@ -94,7 +94,7 @@ MonoBehaviour:
   Name: {fileID: 1666762461262646736}
   Contour: {fileID: 6936442896300148376}
   ContourScore: {fileID: 7238673413168193064}
-  turnDecalage: 100
+  turnDecalage: 0.5
   timeTurnDecalage: 0.5
 --- !u!1 &2398801859557690665
 GameObject:
