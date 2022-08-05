@@ -32,6 +32,7 @@ public class Manager : MonoBehaviour
     private List<GameObject> stockPlayers = new List<GameObject>();
 
     [SerializeField] int nbDeMancheScoreMode = 5;
+    [SerializeField] int howManyPlayers = 0;
 
     [Header("Random number for Balloon")]
     [SerializeField] int minBalloon = 0;
@@ -87,7 +88,7 @@ public class Manager : MonoBehaviour
         }
         else
         {
-            if (_nbOfPlayers > 6)
+            if (_nbOfPlayers >= howManyPlayers)
                 _nbOfPlayers = 0;
 
             _nbOfPlayers++;
@@ -259,7 +260,7 @@ public class Manager : MonoBehaviour
             GameObject go = Instantiate(prefabPlayers, parentPlayers.transform);
             stockPlayers.Add(go);
 
-            go.GetComponent<PlayerHimself>().Init(playersData[i].Name, playersData[i].Color, i);
+            go.GetComponent<PlayerHimself>().Init(playersData[i].Name, playersData[i].Color, playersData[i].BG, i);
 
             if (gameMode == GameMode.Score)
                 go.GetComponent<PlayerHimself>().ActualizeScore(0);

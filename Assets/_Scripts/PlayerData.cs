@@ -8,4 +8,5 @@ public class PlayerData : ScriptableObject
 {
     public string Name;
     public Color Color;
+    public Color BG;
 }

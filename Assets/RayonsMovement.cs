@@ -5,14 +5,9 @@ using DG.Tweening;
 
 public class RayonsMovement : MonoBehaviour
 {
-    private float zAngle = 0f;
+    [SerializeField] private float speed = 0f;
     void Start()
     {
-        zAngle = Time.deltaTime * 3;
-    }
-
-    private void Update()
-    {
-        transform.Rotate(0, 0, zAngle, Space.Self);
+        transform.DORotate(new Vector3(0, 0, 360), speed, RotateMode.FastBeyond360).SetLoops(-1, LoopType.Restart).SetEase(Ease.Linear);
     }
 }

@@ -11,6 +11,7 @@ public class PlayerHimself : MonoBehaviour
     [SerializeField] private TextMeshProUGUI Name = null;
     [SerializeField] private Image Contour = null;
     [SerializeField] private Image ContourScore = null;
+    [SerializeField] private Image BG = null;
     [SerializeField] private float turnDecalage;
     [SerializeField] private float timeTurnDecalage;
 
@@ -19,12 +20,14 @@ public class PlayerHimself : MonoBehaviour
 
     const float _moveYSpawn = 1f;
 
-    public void Init(string _name, Color _color, float _decalage)
+    public void Init(string _name, Color _color, Color _bgColor, float _decalage)
     {
         ActualizeName(_name);
         ContourScore.color = _color;
         Contour.color = _color;
+        BG.color = _bgColor;
         Contour.DOFade(0, .01f);
+        ContourScore.DOFade(0, .01f);
         LaunchMovePlayer(_decalage);
     }
 
@@ -44,6 +47,7 @@ public class PlayerHimself : MonoBehaviour
         Visu.transform.DOComplete();
         Visu.transform.DOMoveY(Visu.transform.position.y - turnDecalage, timeTurnDecalage);
         Contour.DOFade(1f, .5f);
+        ContourScore.DOFade(1f, .5f);
     }
 
     public void MyTurnEnd()
@@ -51,6 +55,7 @@ public class PlayerHimself : MonoBehaviour
         Visu.transform.DOComplete();
         Visu.transform.DOMoveY(Visu.transform.position.y + turnDecalage, timeTurnDecalage);
         Contour.DOFade(0, .5f);
+        ContourScore.DOFade(0, .5f);
     }
 
     public void ActualizeScore(int _score)
