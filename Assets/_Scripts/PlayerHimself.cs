@@ -18,7 +18,7 @@ public class PlayerHimself : MonoBehaviour
     private int actualScore = 0;
     private string namee = string.Empty;
 
-    const float _moveYSpawn = 1f;
+    const float _moveYSpawn = 1.5f;
 
     public void Init(string _name, Color _color, Color _bgColor, float _decalage)
     {

@@ -44,6 +44,7 @@ public class Manager : MonoBehaviour
     //[SerializeField] private Image[] imgButtonsPress;
     [SerializeField] private GameObject[] buttonsNotPress;
     [SerializeField] private GameObject[] buttonsPress;
+    [SerializeField] private GameObject Fade;
 
     const float timeForAClickButton = .1f;
 
@@ -57,9 +58,18 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
+        StartCoroutine(StartGame());
+    }
+
+    IEnumerator StartGame()
+    {
+        Fade.SetActive(true);
+        TransiAnim.Instance.MakeTransiOff();
         _choosenNumber = 0;
-        textHPlayers.transform.DOScale(Vector3.one, .7f);
+        _nbOfPlayers = 1;
         DesacInflatOrNot(false);
+        yield return new WaitForSeconds(1f);
+        textHPlayers.transform.DOScale(Vector3.one, .7f);
     }
 
     private void ChooseRandomNb()
@@ -93,8 +103,10 @@ public class Manager : MonoBehaviour
 
             _nbOfPlayers++;
 
-            if (_nbOfPlayers > 0)
+            if (_nbOfPlayers > 1)
                 validateGreyButtonNb.SetActive(false);
+            else
+                validateGreyButtonNb.SetActive(true);
         }
         ActualizeChoosenNb();
     }
@@ -120,7 +132,7 @@ public class Manager : MonoBehaviour
 
     public void OnValidateNb()
     {
-        if (_nbOfPlayers == 0 || (_choosenNumber == 0 && hasChooseNbPlayers))
+        if (_nbOfPlayers <= 1 || (_choosenNumber == 0 && hasChooseNbPlayers))
             return;
 
         if (hasChooseNbPlayers)
@@ -132,7 +144,7 @@ public class Manager : MonoBehaviour
             _choosenNumber = 0;
         }
         else
-            SpawnPlayers(_nbOfPlayers);
+            StartCoroutine(TransiBeforeSpawn(_nbOfPlayers));
 
         ActualizeChoosenNb();
     }
@@ -158,7 +170,6 @@ public class Manager : MonoBehaviour
         _convertGrow /= 8;
         Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
         balloon.transform.DOScale(_grow, .5f);
-
     }
 
     private IEnumerator DisplayWhosTurn()
@@ -251,6 +262,20 @@ public class Manager : MonoBehaviour
         stockPlayers.RemoveAt(_whichTurn - 1);
     }
 
+    IEnumerator TransiBeforeSpawn(int nbOfPlayers)
+    {
+        textHPlayers.transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
+        yield return new WaitForSeconds(.15f);
+        TransiAnim.Instance.MakeTransiOn();
+        yield return new WaitForSeconds(.15f);
+        textHPlayers.transform.DOScale(Vector3.zero, .25f);
+
+        yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi);
+        TransiAnim.Instance.MakeTransiOff();
+        yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi/2);
+        SpawnPlayers(nbOfPlayers);
+    }
+
     private void SpawnPlayers(int nbOfPlayers)
     {
         ChooseRandomNb();
@@ -267,25 +292,18 @@ public class Manager : MonoBehaviour
         }
 
         hasChooseNbPlayers = true;
-        //balloon.SetActive(true);
         balloon.transform.DOScale(Vector3.one, 2f);
         aroundBalloon.SetActive(true);
-        //textHPlayers.SetActive(false);
-        StartCoroutine(AnimDisappear());
 
+        StartCoroutine(AnimDisappear());
         ActualizeChoosenNb();
         validateGreyButtonNb.SetActive(true);
-
-
-        //StartCoroutine(DisplayWhosTurn());
     }
 
     IEnumerator AnimDisappear()
     {
-        textHPlayers.transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
-        yield return new WaitForSeconds(.3f);
-        textHPlayers.transform.DOScale(Vector3.zero, .25f);
-        yield return new WaitForSeconds(.8f);
+        
+        yield return new WaitForSeconds(_nbOfPlayers * .3f + .3f*2);
         ChangeTurn();
     }
 
