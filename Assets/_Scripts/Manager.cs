@@ -58,7 +58,7 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(StartGame());
+        //StartCoroutine(StartGame());
     }
 
     IEnumerator StartGame()
@@ -70,6 +70,15 @@ public class Manager : MonoBehaviour
         DesacInflatOrNot(false);
         yield return new WaitForSeconds(1f);
         textHPlayers.transform.DOScale(Vector3.one, .7f);
+    }
+
+    public void ChooseScoreMode()
+    {
+        gameMode = GameMode.Score;
+    }
+    public void ChooseMeleeMode()
+    {
+        gameMode = GameMode.Melee;
     }
 
     private void ChooseRandomNb()
@@ -209,14 +218,15 @@ public class Manager : MonoBehaviour
     private IEnumerator ResetGame()
     {
         DesacInflatOrNot(true);
-        
+        balloon.transform.DOKill();
+
         yield return new WaitForSeconds(.1f);
-        
+
         balloon.transform.localScale = Vector3.zero;
         ShakeAnim.Instance.StartShaking();
-        
+
         yield return new WaitForSeconds(ShakeAnim.Instance.duration);
-        
+
         DesacInflatOrNot(true);
         balloon.transform.DOScale(Vector3.one, .5f);
 
@@ -239,8 +249,6 @@ public class Manager : MonoBehaviour
 
             if (nbDeMancheScoreMode <= 0)
                 print("Fin dla game ScoreMode");
-
-            StartCoroutine(ResetGame());
         }
         else if (gameMode == GameMode.Melee)
         {
@@ -249,9 +257,8 @@ public class Manager : MonoBehaviour
 
             StartCoroutine(MakePlayerMeleeDisappear());
             _nbOfPlayers--;
-
-            StartCoroutine(ResetGame());
         }
+        StartCoroutine(ResetGame());
     }
 
     IEnumerator MakePlayerMeleeDisappear()
@@ -272,7 +279,7 @@ public class Manager : MonoBehaviour
 
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi);
         TransiAnim.Instance.MakeTransiOff();
-        yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi/2);
+        yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi / 2);
         SpawnPlayers(nbOfPlayers);
     }
 
@@ -302,8 +309,8 @@ public class Manager : MonoBehaviour
 
     IEnumerator AnimDisappear()
     {
-        
-        yield return new WaitForSeconds(_nbOfPlayers * .3f + .3f*2);
+
+        yield return new WaitForSeconds(_nbOfPlayers * .3f + .3f * 2);
         ChangeTurn();
     }
 
