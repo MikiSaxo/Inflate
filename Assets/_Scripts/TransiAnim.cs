@@ -18,6 +18,6 @@ public class TransiAnim : MonoBehaviour
 
     public void MakeTransiOff()
     {
-        transform.DOScaleY(1f, TimeTransi/2).SetEase(Ease.InExpo);
+        transform.DOScaleY(1f, TimeTransi / 2).SetEase(Ease.InExpo);
     }
 }

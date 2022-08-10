@@ -44,7 +44,11 @@ public class Manager : MonoBehaviour
     //[SerializeField] private Image[] imgButtonsPress;
     [SerializeField] private GameObject[] buttonsNotPress;
     [SerializeField] private GameObject[] buttonsPress;
+    
+    [Header("Beggining Game")]
     [SerializeField] private GameObject Fade;
+    [SerializeField] private GameObject[] title;
+    [SerializeField] private GameObject uiGame;
 
     const float timeForAClickButton = .1f;
 
@@ -64,6 +68,11 @@ public class Manager : MonoBehaviour
     IEnumerator StartGame()
     {
         Fade.SetActive(true);
+        TransiAnim.Instance.MakeTransiOn();
+        yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi + .15f);
+        title[0].SetActive(false);
+        title[1].SetActive(false);
+        uiGame.SetActive(true);
         TransiAnim.Instance.MakeTransiOff();
         _choosenNumber = 0;
         _nbOfPlayers = 1;
@@ -75,10 +84,12 @@ public class Manager : MonoBehaviour
     public void ChooseScoreMode()
     {
         gameMode = GameMode.Score;
+        StartCoroutine(StartGame());
     }
     public void ChooseMeleeMode()
     {
         gameMode = GameMode.Melee;
+        StartCoroutine(StartGame());
     }
 
     private void ChooseRandomNb()
@@ -96,6 +107,8 @@ public class Manager : MonoBehaviour
         {
             _choosenNumber++;
             _actualNumber++;
+            //print((float)_choosenNumber / 10);
+            ShakeAnim.Instance.StartZoom((float)_choosenNumber /30);
             validateGreyButtonNb.SetActive(false);
 
             if (_actualNumber > _randomNumber)
@@ -225,7 +238,7 @@ public class Manager : MonoBehaviour
         balloon.transform.localScale = Vector3.zero;
         ShakeAnim.Instance.StartShaking();
 
-        yield return new WaitForSeconds(ShakeAnim.Instance.duration);
+        yield return new WaitForSeconds(ShakeAnim.Instance.durationZoom);
 
         DesacInflatOrNot(true);
         balloon.transform.DOScale(Vector3.one, .5f);
