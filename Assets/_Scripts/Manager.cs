@@ -207,6 +207,7 @@ public class Manager : MonoBehaviour
         _convertGrow /= 8;
         Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
         balloon.transform.DOScale(_grow, .5f);
+        PunchingBagAnim.Instance.Punch();
     }
 
     private IEnumerator DisplayWhosTurn(Color color)
@@ -254,6 +255,7 @@ public class Manager : MonoBehaviour
     {
         DesacInflatOrNot(true);
         balloon.transform.DOKill();
+        PunchingBagAnim.Instance.ResetPunch();
 
         yield return new WaitForSeconds(.1f);
 
