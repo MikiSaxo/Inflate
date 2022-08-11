@@ -61,7 +61,7 @@ public class PlayerHimself : MonoBehaviour
     public void ActualizeScore(int _score)
     {
         actualScore += _score;
-        Name.text = $"{namee} : {_score}";
+        Name.text = $"{namee} : {actualScore}";
     }
 
     private void ActualizeName(string _name)
