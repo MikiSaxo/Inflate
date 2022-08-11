@@ -14,13 +14,14 @@ public class Manager : MonoBehaviour
     private int _whichTurn = 0;
     private int _actualgrow = 10;
     private bool someoneLose = false;
+    private bool hasChooseGameMode = false;
     private bool hasChooseNbPlayers = false;
     private bool cannotPressInflate = false;
 
     [SerializeField] private TextMeshProUGUI[] choosenNb = null;
     [SerializeField] private GameObject balloon = null;
     [SerializeField] private GameObject aroundBalloon = null;
-    [SerializeField] private GameObject textHPlayers = null;
+    [SerializeField] private GameObject[] instructions = null;
     [SerializeField] private string textDisplayTurn = null;
     [SerializeField] private GameObject prefabPlayers = null;
     [SerializeField] private GameObject parentPlayers = null;
@@ -78,18 +79,32 @@ public class Manager : MonoBehaviour
         _nbOfPlayers = 1;
         DesacInflatOrNot(false);
         yield return new WaitForSeconds(1f);
-        textHPlayers.transform.DOScale(Vector3.one, .7f);
+        instructions[2].transform.DOScale(Vector3.one, .7f);
     }
 
     public void ChooseScoreMode()
     {
+        if (hasChooseGameMode)
+            return;
+
         gameMode = GameMode.Score;
         StartCoroutine(StartGame());
+
+        hasChooseGameMode = true;
+        title[2].SetActive(false);
+        title[3].SetActive(true);
     }
     public void ChooseMeleeMode()
     {
+        if (hasChooseGameMode)
+            return;
+
         gameMode = GameMode.Melee;
         StartCoroutine(StartGame());
+
+        hasChooseGameMode = true;
+        title[2].SetActive(false);
+        title[3].SetActive(true);
     }
 
     private void ChooseRandomNb()
@@ -194,15 +209,22 @@ public class Manager : MonoBehaviour
         balloon.transform.DOScale(_grow, .5f);
     }
 
-    private IEnumerator DisplayWhosTurn()
+    private IEnumerator DisplayWhosTurn(Color color)
     {
-        textHPlayers.GetComponent<TextMeshProUGUI>().text = $"</color=blue>J{_whichTurn}</color> {textDisplayTurn}"; //la couleur marche pas
-        textHPlayers.transform.DOComplete();
-        textHPlayers.transform.DOScale(Vector3.one, .7f);
+        DesacInflatOrNot(true);
+        instructions[1].SetActive(true);
+        instructions[0].transform.localPosition = new Vector3(270, -13, -30);
+        instructions[1].transform.localPosition = new Vector3(270, -13, -30);
+
+        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>J{_whichTurn}</wave>{textDisplayTurn}";
+        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>J{_whichTurn}</color></wave>";
+        instructions[2].transform.DOComplete();
+        instructions[2].transform.DOScale(Vector3.one, .7f);
         yield return new WaitForSeconds(1.5f);
-        textHPlayers.transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
+        instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         yield return new WaitForSeconds(.3f);
-        textHPlayers.transform.DOScale(Vector3.zero, .25f);
+        instructions[2].transform.DOScale(Vector3.zero, .25f);
+        //instructions[1].transform.DOScale(Vector3.zero, .25f);
         DesacInflatOrNot(false);
     }
 
@@ -225,7 +247,7 @@ public class Manager : MonoBehaviour
 
         stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
         validateGreyButtonNb.SetActive(true);
-        StartCoroutine(DisplayWhosTurn());
+        StartCoroutine(DisplayWhosTurn(playersData[_whichTurn-1].Color));
     }
 
     private IEnumerator ResetGame()
@@ -284,11 +306,11 @@ public class Manager : MonoBehaviour
 
     IEnumerator TransiBeforeSpawn(int nbOfPlayers)
     {
-        textHPlayers.transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
+        instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         yield return new WaitForSeconds(.15f);
         TransiAnim.Instance.MakeTransiOn();
         yield return new WaitForSeconds(.15f);
-        textHPlayers.transform.DOScale(Vector3.zero, .25f);
+        instructions[2].transform.DOScale(Vector3.zero, .25f);
 
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi);
         TransiAnim.Instance.MakeTransiOff();
