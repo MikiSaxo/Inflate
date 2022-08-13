@@ -61,6 +61,12 @@ public class Manager : MonoBehaviour
         Melee
     }
 
+    public static Manager Instance;
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
         //StartCoroutine(StartGame());
