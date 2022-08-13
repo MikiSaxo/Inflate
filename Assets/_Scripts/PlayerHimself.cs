@@ -77,7 +77,5 @@ public class PlayerHimself : MonoBehaviour
             ActualizeScore(actualScore);
             NameScore.text = _name;
         }
-
-
     }
 }

@@ -23,7 +23,9 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject aroundBalloon = null;
     [SerializeField] private GameObject[] instructions = null;
     [SerializeField] private string textDisplayTurn = null;
+    [SerializeField] private GameObject prefabInput = null;
     [SerializeField] private GameObject prefabPlayers = null;
+    [SerializeField] private GameObject[] parentInput = null;
     [SerializeField] private GameObject parentPlayers = null;
     [SerializeField] private GameObject validateGreyButtonNb = null;
     [SerializeField] private GameObject inflateGreyButton = null;
@@ -45,7 +47,7 @@ public class Manager : MonoBehaviour
     //[SerializeField] private Image[] imgButtonsPress;
     [SerializeField] private GameObject[] buttonsNotPress;
     [SerializeField] private GameObject[] buttonsPress;
-    
+
     [Header("Beggining Game")]
     [SerializeField] private GameObject Fade;
     [SerializeField] private GameObject[] title;
@@ -129,7 +131,7 @@ public class Manager : MonoBehaviour
             _choosenNumber++;
             _actualNumber++;
             //print((float)_choosenNumber / 10);
-            ShakeAnim.Instance.StartZoom((float)_choosenNumber /30);
+            ShakeAnim.Instance.StartZoom((float)_choosenNumber / 30);
             validateGreyButtonNb.SetActive(false);
 
             if (_actualNumber > _randomNumber)
@@ -187,7 +189,7 @@ public class Manager : MonoBehaviour
             _choosenNumber = 0;
         }
         else
-            StartCoroutine(TransiBeforeSpawn(_nbOfPlayers));
+            StartCoroutine(ChoosePlayerName(_nbOfPlayers));
 
         ActualizeChoosenNb();
     }
@@ -254,7 +256,7 @@ public class Manager : MonoBehaviour
 
         stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
         validateGreyButtonNb.SetActive(true);
-        StartCoroutine(DisplayWhosTurn(playersData[_whichTurn-1].Color));
+        StartCoroutine(DisplayWhosTurn(playersData[_whichTurn - 1].Color));
     }
 
     private IEnumerator ResetGame()
@@ -312,6 +314,39 @@ public class Manager : MonoBehaviour
         stockPlayers.RemoveAt(_whichTurn - 1);
     }
 
+    public void ChangePlayerName(int _index, string _name)
+    {
+        print(_name);
+        playersData[_index].Name = _name;
+    }
+
+    IEnumerator ChoosePlayerName(int nbOfPlayers)
+    {
+        instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
+        yield return new WaitForSeconds(.15f);
+        TransiAnim.Instance.MakeTransiOn();
+        yield return new WaitForSeconds(.15f);
+        instructions[2].transform.DOScale(Vector3.zero, .25f);
+        yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi);
+
+        uiGame.SetActive(false);
+        parentInput[0].SetActive(true);
+        for (int i = 0; i < nbOfPlayers; i++)
+        {
+            GameObject go = Instantiate(prefabInput, parentInput[1].transform);
+
+            go.GetComponent<InputInit>().Init(playersData[i].BG, i);
+        }
+
+        TransiAnim.Instance.MakeTransiOff();
+        yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi / 2);
+    }
+
+    public void LaunchTransiSpawn()
+    {
+        StartCoroutine(TransiBeforeSpawn(_nbOfPlayers));
+    }
+
     IEnumerator TransiBeforeSpawn(int nbOfPlayers)
     {
         instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
@@ -321,6 +356,8 @@ public class Manager : MonoBehaviour
         instructions[2].transform.DOScale(Vector3.zero, .25f);
 
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi);
+        uiGame.SetActive(true);
+        parentInput[0].SetActive(false);
         TransiAnim.Instance.MakeTransiOff();
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi / 2);
         SpawnPlayers(nbOfPlayers);
