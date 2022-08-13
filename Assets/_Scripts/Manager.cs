@@ -16,7 +16,9 @@ public class Manager : MonoBehaviour
     private bool someoneLose = false;
     private bool hasChooseGameMode = false;
     private bool hasChooseNbPlayers = false;
+    private bool hasChooseNamePlayers = false;
     private bool cannotPressInflate = false;
+    private bool cannotPressValidate = false;
 
     [SerializeField] private TextMeshProUGUI[] choosenNb = null;
     [SerializeField] private GameObject balloon = null;
@@ -47,6 +49,8 @@ public class Manager : MonoBehaviour
     //[SerializeField] private Image[] imgButtonsPress;
     [SerializeField] private GameObject[] buttonsNotPress;
     [SerializeField] private GameObject[] buttonsPress;
+    private Color test = Color.black;
+    
 
     [Header("Beggining Game")]
     [SerializeField] private GameObject Fade;
@@ -71,6 +75,7 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
+        test.a = 0;
         //StartCoroutine(StartGame());
     }
 
@@ -177,7 +182,7 @@ public class Manager : MonoBehaviour
 
     public void OnValidateNb()
     {
-        if (_nbOfPlayers <= 1 || (_choosenNumber == 0 && hasChooseNbPlayers))
+        if (_nbOfPlayers <= 1 || (_choosenNumber == 0 && hasChooseNbPlayers) || cannotPressValidate)
             return;
 
         if (hasChooseNbPlayers)
@@ -222,13 +227,12 @@ public class Manager : MonoBehaviour
     {
         DesacInflatOrNot(true);
         instructions[1].SetActive(true);
-        instructions[0].transform.localPosition = new Vector3(270, -13, -30);
-        instructions[1].transform.localPosition = new Vector3(270, -13, -30);
 
-        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>J{_whichTurn}</wave>{textDisplayTurn}";
-        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>J{_whichTurn}</color></wave>";
+        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{playersData[_whichTurn-1].Name}</wave>{textDisplayTurn}";
+        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>{playersData[_whichTurn-1].Name}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(test)}>{textDisplayTurn}";
         instructions[2].transform.DOComplete();
         instructions[2].transform.DOScale(Vector3.one, .7f);
+
         yield return new WaitForSeconds(1.5f);
         instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         yield return new WaitForSeconds(.3f);
@@ -322,6 +326,8 @@ public class Manager : MonoBehaviour
 
     IEnumerator ChoosePlayerName(int nbOfPlayers)
     {
+        DesacValidateOrNot(true);
+
         instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         yield return new WaitForSeconds(.15f);
         TransiAnim.Instance.MakeTransiOn();
@@ -340,11 +346,18 @@ public class Manager : MonoBehaviour
 
         TransiAnim.Instance.MakeTransiOff();
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi / 2);
+
+        DesacValidateOrNot(false);
     }
 
     public void LaunchTransiSpawn()
     {
+        if (hasChooseNamePlayers)
+            return;
+        hasChooseNamePlayers = true;
+
         StartCoroutine(TransiBeforeSpawn(_nbOfPlayers));
+        DesacValidateOrNot(true);
     }
 
     IEnumerator TransiBeforeSpawn(int nbOfPlayers)
@@ -365,8 +378,8 @@ public class Manager : MonoBehaviour
 
     private void SpawnPlayers(int nbOfPlayers)
     {
-        ChooseRandomNb();
         DesacInflatOrNot(true);
+        ChooseRandomNb();
         for (int i = 0; i < nbOfPlayers; i++)
         {
             GameObject go = Instantiate(prefabPlayers, parentPlayers.transform);
@@ -389,7 +402,6 @@ public class Manager : MonoBehaviour
 
     IEnumerator AnimDisappear()
     {
-
         yield return new WaitForSeconds(_nbOfPlayers * .3f + .3f * 2);
         ChangeTurn();
     }
@@ -428,5 +440,11 @@ public class Manager : MonoBehaviour
     {
         inflateGreyButton.SetActive(_tellMe);
         cannotPressInflate = _tellMe;
+    }
+
+    private void DesacValidateOrNot(bool _tellMe)
+    {
+        validateGreyButtonNb.SetActive(_tellMe);
+        cannotPressValidate = _tellMe;
     }
 }

@@ -12,7 +12,7 @@ public class InputInit : MonoBehaviour
     {
         BG.color = _bgColor;
         index = _index;
-        string _resetName = $"Player {index}";
+        string _resetName = $"Player {index + 1}";
         Manager.Instance.ChangePlayerName(index, _resetName);
     }
 
