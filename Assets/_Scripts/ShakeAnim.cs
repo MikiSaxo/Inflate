@@ -22,19 +22,21 @@ public class ShakeAnim : MonoBehaviour
         if (start)
         {
             start = false;
-            StartCoroutine(Shaking());
+            StartCoroutine(Shaking(0));
         }
     }
 
-    private IEnumerator Shaking()
+    private IEnumerator Shaking(float _numberChoose)
     {
         Vector3 startPosition = transform.position;
         float elapsedTime = 0f;
 
-        while (elapsedTime < durationZoom)
+        var _addDuration = _numberChoose / 25 + durationShaking;
+
+        while (elapsedTime < _addDuration)
         {
             elapsedTime += Time.deltaTime;
-            float strength = curve.Evaluate(elapsedTime / durationZoom);
+            float strength = curve.Evaluate(elapsedTime / _addDuration);
             transform.position = startPosition + Random.insideUnitSphere * strength;
             yield return null;
         }
@@ -42,9 +44,9 @@ public class ShakeAnim : MonoBehaviour
         transform.position = startPosition;
     }
 
-    public void StartShaking()
+    public void StartShaking(float _numberChoose)
     {
-        StartCoroutine(Shaking());
+        StartCoroutine(Shaking(_numberChoose));
     }
 
     private IEnumerator ZoomCam(float _numberZoom)

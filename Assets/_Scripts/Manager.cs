@@ -31,6 +31,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject prefabPlayers = null;
     [SerializeField] private GameObject[] parentInput = null;
     [SerializeField] private GameObject parentPlayers = null;
+    [SerializeField] private GameObject parentFX= null;
     [SerializeField] private GameObject validateGreyButtonNb = null;
     [SerializeField] private GameObject inflateGreyButton = null;
     [SerializeField] private GameObject exploBalloonFX = null;
@@ -139,7 +140,7 @@ public class Manager : MonoBehaviour
             _choosenNumber++;
             _actualNumber++;
             ShakeAnim.Instance.StartZoom((float)_choosenNumber / 30);
-            validateGreyButtonNb.SetActive(false);
+            DesacValidateOrNot(false);
 
             if (_actualNumber > _randomNumber)
             {
@@ -156,31 +157,12 @@ public class Manager : MonoBehaviour
             _nbOfPlayers++;
 
             if (_nbOfPlayers > 1)
-                validateGreyButtonNb.SetActive(false);
+                DesacValidateOrNot(false);
             else
-                validateGreyButtonNb.SetActive(true);
+                DesacValidateOrNot(true);
         }
         ActualizeChoosenNb();
     }
-
-    //public void OnClickMinus()
-    //{
-    //    if (hasChooseNbPlayers)
-    //    {
-    //        if (choosenNumber < 2)
-    //            return;
-
-    //        choosenNumber--;
-    //    }
-    //    else
-    //    {
-    //        if (nbOfPlayers < 1)
-    //            return;
-
-    //        nbOfPlayers--;
-    //    }
-    //    ActualizeChoosenNb();
-    //}
 
     public void OnValidateNb()
     {
@@ -274,7 +256,7 @@ public class Manager : MonoBehaviour
             _whichTurn = 1;
 
         stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
-        validateGreyButtonNb.SetActive(true);
+        DesacValidateOrNot(true);
         StartCoroutine(DisplayWhosTurn(stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Colorr));
     }
 
@@ -287,10 +269,16 @@ public class Manager : MonoBehaviour
         yield return new WaitForSeconds(.1f);
 
         balloon.transform.localScale = Vector3.zero;
-        Instantiate(exploBalloonFX, balloon.transform);
-        ShakeAnim.Instance.StartShaking();
+        GameObject go = Instantiate(exploBalloonFX, parentFX.transform);
 
-        yield return new WaitForSeconds(ShakeAnim.Instance.durationZoom);
+        float _convertGrow = _actualgrow;
+        _convertGrow /= 25;
+        Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
+        go.transform.localScale = _grow;
+
+        ShakeAnim.Instance.StartShaking(_actualNumber);
+
+        yield return new WaitForSeconds((ShakeAnim.Instance.durationShaking + _actualgrow) / 25);
 
         DesacInflatOrNot(true);
         balloon.transform.DOScale(Vector3.one, .5f);
@@ -412,7 +400,7 @@ public class Manager : MonoBehaviour
 
         StartCoroutine(AnimDisappear());
         ActualizeChoosenNb();
-        validateGreyButtonNb.SetActive(true);
+        DesacValidateOrNot(true);
     }
 
     IEnumerator AnimDisappear()
@@ -420,20 +408,6 @@ public class Manager : MonoBehaviour
         yield return new WaitForSeconds(_nbOfPlayers * .3f + .3f * 2);
         ChangeTurn();
     }
-
-
-    //public void OnPointerEnter(int whichButton)
-    //{
-    //    if (whichButton == 0)
-    //        imgButtonsNotPress[whichButton].DOColor(colorsButtons[1], timeToEnterHoverColorButtons);
-    //    else
-    //        imgButtonsNotPress[whichButton].DOColor(colorsButtons[2], timeToEnterHoverColorButtons);
-    //}
-
-    //public void OnPointerExit(int whichButton)
-    //{
-    //    imgButtonsNotPress[whichButton].DOColor(colorsButtons[0], timeToExitHoverColorButtons);
-    //}
 
     public void OnPointerClick(int whichButton)
     {
