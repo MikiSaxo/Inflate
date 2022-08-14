@@ -33,6 +33,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject parentPlayers = null;
     [SerializeField] private GameObject validateGreyButtonNb = null;
     [SerializeField] private GameObject inflateGreyButton = null;
+    [SerializeField] private GameObject exploBalloonFX = null;
 
     [SerializeField] private PlayerData[] playersData;
 
@@ -286,6 +287,7 @@ public class Manager : MonoBehaviour
         yield return new WaitForSeconds(.1f);
 
         balloon.transform.localScale = Vector3.zero;
+        Instantiate(exploBalloonFX, balloon.transform);
         ShakeAnim.Instance.StartShaking();
 
         yield return new WaitForSeconds(ShakeAnim.Instance.durationZoom);
