@@ -13,6 +13,8 @@ public class Manager : MonoBehaviour
     private int _nbOfPlayers = 0;
     private int _whichTurn = 0;
     private int _actualgrow = 10;
+    private int _lastScore = 0;
+    private int _lastKing = -1;
     private bool someoneLose = false;
     private bool hasChooseGameMode = false;
     private bool hasChooseNbPlayers = false;
@@ -135,7 +137,6 @@ public class Manager : MonoBehaviour
         {
             _choosenNumber++;
             _actualNumber++;
-            //print((float)_choosenNumber / 10);
             ShakeAnim.Instance.StartZoom((float)_choosenNumber / 30);
             validateGreyButtonNb.SetActive(false);
 
@@ -190,11 +191,24 @@ public class Manager : MonoBehaviour
             if (gameMode == GameMode.Score)
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
 
+            if(_choosenNumber > _lastScore && gameMode == GameMode.Score)
+            {
+                stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActiCrownOrNot(true);
+                if(_lastKing >= 0)
+                    stockPlayers[_lastKing].GetComponent<PlayerHimself>().ActiCrownOrNot(false);
+
+                _lastKing = _whichTurn- 1;
+                _lastScore = _choosenNumber;
+            }
+
             ChangeTurn();
             _choosenNumber = 0;
         }
         else
+        {
             StartCoroutine(ChoosePlayerName(_nbOfPlayers));
+            DesacInflatOrNot(true);
+        }
 
         ActualizeChoosenNb();
     }
@@ -228,8 +242,8 @@ public class Manager : MonoBehaviour
         DesacInflatOrNot(true);
         instructions[1].SetActive(true);
 
-        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{playersData[_whichTurn-1].Name}</wave>{textDisplayTurn}";
-        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>{playersData[_whichTurn-1].Name}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(test)}>{textDisplayTurn}";
+        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{stockPlayers[_whichTurn-1].GetComponent<PlayerHimself>().Namee}</wave>{textDisplayTurn}";
+        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(test)}>{textDisplayTurn}";
         instructions[2].transform.DOComplete();
         instructions[2].transform.DOScale(Vector3.one, .7f);
 
@@ -260,7 +274,7 @@ public class Manager : MonoBehaviour
 
         stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
         validateGreyButtonNb.SetActive(true);
-        StartCoroutine(DisplayWhosTurn(playersData[_whichTurn - 1].Color));
+        StartCoroutine(DisplayWhosTurn(stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Colorr));
     }
 
     private IEnumerator ResetGame()
@@ -320,7 +334,6 @@ public class Manager : MonoBehaviour
 
     public void ChangePlayerName(int _index, string _name)
     {
-        print(_name);
         playersData[_index].Name = _name;
     }
 
@@ -357,7 +370,7 @@ public class Manager : MonoBehaviour
         hasChooseNamePlayers = true;
 
         StartCoroutine(TransiBeforeSpawn(_nbOfPlayers));
-        DesacValidateOrNot(true);
+        //DesacValidateOrNot(true);
     }
 
     IEnumerator TransiBeforeSpawn(int nbOfPlayers)
@@ -371,8 +384,8 @@ public class Manager : MonoBehaviour
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi);
         uiGame.SetActive(true);
         parentInput[0].SetActive(false);
-        TransiAnim.Instance.MakeTransiOff();
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi / 2);
+        TransiAnim.Instance.MakeTransiOff();
         SpawnPlayers(nbOfPlayers);
     }
 

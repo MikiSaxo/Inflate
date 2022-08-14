@@ -372,7 +372,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BG: {fileID: 790449238956011864}
-  index: 0
+  mainInputField: {fileID: 961748110567827986}
+  maxLenght: 12
 --- !u!1 &961748111974284458
 GameObject:
   m_ObjectHideFlags: 0

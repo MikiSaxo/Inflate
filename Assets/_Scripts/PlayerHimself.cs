@@ -8,6 +8,7 @@ using DG.Tweening;
 public class PlayerHimself : MonoBehaviour
 {
     [SerializeField] private GameObject Visu = null;
+    [SerializeField] private GameObject crown = null;
     [SerializeField] private TextMeshProUGUI Score = null;
     [SerializeField] private TextMeshProUGUI NameMelee = null;
     [SerializeField] private TextMeshProUGUI NameScore = null;
@@ -17,12 +18,16 @@ public class PlayerHimself : MonoBehaviour
     [SerializeField] private float turnDecalage = 0f;
     [SerializeField] private float timeTurnDecalage = 0f;
 
+    [HideInInspector] public string Namee = string.Empty;
+    [HideInInspector] public Color Colorr;
+
     private int actualScore = 0;
 
     const float _moveYSpawn = 1.5f;
 
     public void Init(string _name, Color _color, Color _bgColor, float _decalage)
     {
+        Colorr = _color;
         ActualizeName(_name);
         ContourScore.color = _color;
         Contour.color = _color;
@@ -67,6 +72,7 @@ public class PlayerHimself : MonoBehaviour
 
     private void ActualizeName(string _name)
     {
+        Namee = _name;
         if (Manager.Instance.gameMode == Manager.GameMode.Melee)
         {
             Score.text = "";
@@ -77,5 +83,10 @@ public class PlayerHimself : MonoBehaviour
             ActualizeScore(actualScore);
             NameScore.text = _name;
         }
+    }
+
+    public void ActiCrownOrNot(bool which)
+    {
+        crown.SetActive(which);
     }
 }
