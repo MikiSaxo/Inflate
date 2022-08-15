@@ -135,6 +135,7 @@ public class Manager : MonoBehaviour
         if (cannotPressInflate)
             return;
 
+        FX_Inflate.Instance.Start_FX_Inflate();
         if (hasChooseNbPlayers)
         {
             _choosenNumber++;

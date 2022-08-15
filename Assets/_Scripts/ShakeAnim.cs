@@ -26,6 +26,11 @@ public class ShakeAnim : MonoBehaviour
         }
     }
 
+    public void StartShaking(float _numberChoose)
+    {
+        StartCoroutine(Shaking(_numberChoose));
+    }
+
     private IEnumerator Shaking(float _numberChoose)
     {
         Vector3 startPosition = transform.position;
@@ -44,9 +49,10 @@ public class ShakeAnim : MonoBehaviour
         transform.position = startPosition;
     }
 
-    public void StartShaking(float _numberChoose)
+
+    public void StartZoom(float _numberZoom)
     {
-        StartCoroutine(Shaking(_numberChoose));
+        StartCoroutine(ZoomCam(_numberZoom));
     }
 
     private IEnumerator ZoomCam(float _numberZoom)
@@ -55,10 +61,5 @@ public class ShakeAnim : MonoBehaviour
         gameObject.GetComponent<Camera>().DOOrthoSize(5f - _numberZoom, .1f);
         yield return new WaitForSeconds(durationZoom);
         gameObject.GetComponent<Camera>().DOOrthoSize(5f, .05f);
-    }
-
-    public void StartZoom(float _numberZoom)
-    {
-        StartCoroutine(ZoomCam(_numberZoom));
     }
 }
