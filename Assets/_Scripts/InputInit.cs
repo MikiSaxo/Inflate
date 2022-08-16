@@ -9,8 +9,8 @@ public class InputInit : MonoBehaviour
     [SerializeField] private Image BG = null;
     [SerializeField] TMP_InputField mainInputField;
     [SerializeField] int maxLenght;
-    
 
+    private TouchScreenKeyboard keyboard;
     private int index;
 
     void Start()
@@ -29,5 +29,10 @@ public class InputInit : MonoBehaviour
     public void ReadInput(string _name)
     {
         Manager.Instance.ChangePlayerName(index, _name);
+    }
+
+    public void OpenKeyboard()
+    {
+        keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default);
     }
 }
