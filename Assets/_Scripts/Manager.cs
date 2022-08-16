@@ -27,6 +27,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject aroundBalloon = null;
     [SerializeField] private GameObject[] instructions = null;
     [SerializeField] private string textDisplayTurn = null;
+    [SerializeField] private string textDisplayTurnLeft = null;
     [SerializeField] private GameObject prefabInput = null;
     [SerializeField] private GameObject prefabPlayers = null;
     [SerializeField] private GameObject[] parentInput = null;
@@ -231,6 +232,7 @@ public class Manager : MonoBehaviour
     {
         DesacInflatOrNot(true);
         instructions[1].SetActive(true);
+        instructions[1].transform.localScale = Vector3.one;
 
         instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</wave>{textDisplayTurn}";
         instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(test)}>{textDisplayTurn}";
@@ -243,6 +245,22 @@ public class Manager : MonoBehaviour
         instructions[2].transform.DOScale(Vector3.zero, .25f);
         //instructions[1].transform.DOScale(Vector3.zero, .25f);
         DesacInflatOrNot(false);
+    }
+
+    private IEnumerator DisplayHowManyTurnLeft()
+    {
+        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<bounce><u>{nbDeMancheScoreMode}</u> {textDisplayTurnLeft}";
+        instructions[1].transform.localScale = Vector3.zero;
+        instructions[2].transform.DOScale(Vector3.one, .7f);
+
+        yield return new WaitForSeconds(1.5f);
+        instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
+        yield return new WaitForSeconds(.3f);
+        instructions[2].transform.DOScale(Vector3.zero, .25f);
+        yield return new WaitForSeconds(.35f);
+
+        ChangeTurn();
+        //StartCoroutine(DisplayWhosTurn(stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Colorr));
     }
 
     private void ChangeTurn()
@@ -263,7 +281,7 @@ public class Manager : MonoBehaviour
             _whichTurn = 1;
 
         stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
-        
+
         //DesacValidateOrNot(true);
         //validateGreyButtonNb.transform.localScale = Vector3.one;
         //cannotPressValidate = true;
@@ -287,7 +305,7 @@ public class Manager : MonoBehaviour
         Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
         go.transform.localScale = _grow;
 
-        ShakeAnim.Instance.StartShaking(_actualNumber);
+        ShakeAnim.Instance.StartShakingCam(_actualNumber);
 
         yield return new WaitForSeconds((ShakeAnim.Instance.durationShaking + _actualgrow) / 25);
 
@@ -301,7 +319,10 @@ public class Manager : MonoBehaviour
 
         ChooseRandomNb();
         ActualizeChoosenNb();
-        ChangeTurn();
+        if (gameMode == GameMode.Score)
+            StartCoroutine(DisplayHowManyTurnLeft());
+        else
+            StartCoroutine(DisplayHowManyTurnLeft());
     }
 
     private void EndGame()
@@ -421,7 +442,7 @@ public class Manager : MonoBehaviour
     IEnumerator AnimDisappear()
     {
         yield return new WaitForSeconds(_nbOfPlayers * .3f + .3f * 2);
-        ChangeTurn();
+        StartCoroutine(DisplayHowManyTurnLeft());
     }
 
     public void OnPointerClick(int whichButton)

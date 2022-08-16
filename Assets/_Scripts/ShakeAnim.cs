@@ -26,7 +26,7 @@ public class ShakeAnim : MonoBehaviour
         }
     }
 
-    public void StartShaking(float _numberChoose)
+    public void StartShakingCam(float _numberChoose)
     {
         StartCoroutine(Shaking(_numberChoose));
     }
