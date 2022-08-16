@@ -31,7 +31,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject prefabPlayers = null;
     [SerializeField] private GameObject[] parentInput = null;
     [SerializeField] private GameObject parentPlayers = null;
-    [SerializeField] private GameObject parentFX= null;
+    [SerializeField] private GameObject parentFX = null;
     [SerializeField] private GameObject validateGreyButtonNb = null;
     [SerializeField] private GameObject inflateGreyButton = null;
     [SerializeField] private GameObject exploBalloonFX = null;
@@ -54,7 +54,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject[] buttonsNotPress;
     [SerializeField] private GameObject[] buttonsPress;
     private Color test = Color.black;
-    
+
 
     [Header("Beggining Game")]
     [SerializeField] private GameObject Fade;
@@ -110,6 +110,7 @@ public class Manager : MonoBehaviour
         hasChooseGameMode = true;
         title[2].SetActive(false);
         title[3].SetActive(true);
+        title[5].SetActive(false);
     }
     public void ChooseMeleeMode()
     {
@@ -122,6 +123,7 @@ public class Manager : MonoBehaviour
         hasChooseGameMode = true;
         title[2].SetActive(false);
         title[3].SetActive(true);
+        title[4].SetActive(false);
     }
 
     private void ChooseRandomNb()
@@ -160,7 +162,10 @@ public class Manager : MonoBehaviour
             if (_nbOfPlayers > 1)
                 DesacValidateOrNot(false);
             else
-                DesacValidateOrNot(true);
+            {
+                validateGreyButtonNb.transform.localScale = Vector3.one;
+                cannotPressValidate = true;
+            }
         }
         ActualizeChoosenNb();
     }
@@ -175,16 +180,17 @@ public class Manager : MonoBehaviour
             if (gameMode == GameMode.Score)
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
 
-            if(_choosenNumber > _lastScore && gameMode == GameMode.Score)
+            if (_choosenNumber > _lastScore && gameMode == GameMode.Score)
             {
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActiCrownOrNot(true);
-                if(_lastKing >= 0)
+                if (_lastKing >= 0)
                     stockPlayers[_lastKing].GetComponent<PlayerHimself>().ActiCrownOrNot(false);
 
-                _lastKing = _whichTurn- 1;
+                _lastKing = _whichTurn - 1;
                 _lastScore = _choosenNumber;
             }
 
+            DesacValidateOrNot(true);
             ChangeTurn();
             _choosenNumber = 0;
         }
@@ -226,7 +232,7 @@ public class Manager : MonoBehaviour
         DesacInflatOrNot(true);
         instructions[1].SetActive(true);
 
-        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{stockPlayers[_whichTurn-1].GetComponent<PlayerHimself>().Namee}</wave>{textDisplayTurn}";
+        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</wave>{textDisplayTurn}";
         instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(test)}>{textDisplayTurn}";
         instructions[2].transform.DOComplete();
         instructions[2].transform.DOScale(Vector3.one, .7f);
@@ -257,7 +263,11 @@ public class Manager : MonoBehaviour
             _whichTurn = 1;
 
         stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
-        DesacValidateOrNot(true);
+        
+        //DesacValidateOrNot(true);
+        //validateGreyButtonNb.transform.localScale = Vector3.one;
+        //cannotPressValidate = true;
+
         StartCoroutine(DisplayWhosTurn(stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Colorr));
     }
 
@@ -360,6 +370,7 @@ public class Manager : MonoBehaviour
             return;
         hasChooseNamePlayers = true;
 
+        StartCoroutine(MakeAClick(2));
         StartCoroutine(TransiBeforeSpawn(_nbOfPlayers));
         //DesacValidateOrNot(true);
     }
@@ -401,7 +412,10 @@ public class Manager : MonoBehaviour
 
         StartCoroutine(AnimDisappear());
         ActualizeChoosenNb();
-        DesacValidateOrNot(true);
+
+        //DesacValidateOrNot(true);
+        validateGreyButtonNb.transform.localScale = Vector3.one;
+        cannotPressValidate = true;
     }
 
     IEnumerator AnimDisappear()
@@ -434,7 +448,19 @@ public class Manager : MonoBehaviour
 
     private void DesacValidateOrNot(bool _tellMe)
     {
-        validateGreyButtonNb.SetActive(_tellMe);
+        //validateGreyButtonNb.SetActive(_tellMe);
+        if (_tellMe)
+        {
+            title[6].SetActive(false);
+            //validateGreyButtonNb.transform.localScale = Vector3.one;
+            StartCoroutine(MakeAClick(1));
+        }
+        else
+        {
+            title[6].SetActive(true);
+            validateGreyButtonNb.transform.localScale = Vector3.zero;
+        }
+
         cannotPressValidate = _tellMe;
     }
 }
