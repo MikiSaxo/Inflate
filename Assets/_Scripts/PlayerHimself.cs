@@ -20,8 +20,7 @@ public class PlayerHimself : MonoBehaviour
 
     [HideInInspector] public string Namee = string.Empty;
     [HideInInspector] public Color Colorr;
-
-    private int actualScore = 0;
+    [HideInInspector] public int actualScore = 0;
 
     const float _moveYSpawn = 1.5f;
 

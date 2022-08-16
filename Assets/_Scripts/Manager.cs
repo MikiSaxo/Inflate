@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 public class Manager : MonoBehaviour
 {
@@ -15,10 +16,13 @@ public class Manager : MonoBehaviour
     private int _actualgrow = 10;
     private int _lastScore = 0;
     private int _lastKing = -1;
+    private int _maxScore = 0;
+    private int _whichMaxScore = 0;
     private bool someoneLose = false;
     private bool hasChooseGameMode = false;
     private bool hasChooseNbPlayers = false;
     private bool hasChooseNamePlayers = false;
+    private bool hasGameEnded = false;
     private bool cannotPressInflate = false;
     private bool cannotPressValidate = false;
 
@@ -28,6 +32,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject[] instructions = null;
     [SerializeField] private string textDisplayTurn = null;
     [SerializeField] private string textDisplayTurnLeft = null;
+    [SerializeField] private string textDisplayWon = null;
     [SerializeField] private GameObject prefabInput = null;
     [SerializeField] private GameObject prefabPlayers = null;
     [SerializeField] private GameObject[] parentInput = null;
@@ -50,11 +55,9 @@ public class Manager : MonoBehaviour
 
     [Header("Buttons Colors")]
     [SerializeField] private Color[] colorsButtons;
-    //[SerializeField] private Image[] imgButtonsNotPress;
-    //[SerializeField] private Image[] imgButtonsPress;
     [SerializeField] private GameObject[] buttonsNotPress;
     [SerializeField] private GameObject[] buttonsPress;
-    private Color test = Color.black;
+    private Color invisibleText = Color.black;
 
 
     [Header("Beggining Game")]
@@ -80,8 +83,8 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
-        test.a = 0;
-        //StartCoroutine(StartGame());
+        invisibleText.a = 0;
+        TransiAnim.Instance.MakeTransiOff();
     }
 
     IEnumerator StartGame()
@@ -235,7 +238,7 @@ public class Manager : MonoBehaviour
         instructions[1].transform.localScale = Vector3.one;
 
         instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</wave>{textDisplayTurn}";
-        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(test)}>{textDisplayTurn}";
+        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(color)}>{stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Namee}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(invisibleText)}>{textDisplayTurn}";
         instructions[2].transform.DOComplete();
         instructions[2].transform.DOScale(Vector3.one, .7f);
 
@@ -243,7 +246,6 @@ public class Manager : MonoBehaviour
         instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         yield return new WaitForSeconds(.3f);
         instructions[2].transform.DOScale(Vector3.zero, .25f);
-        //instructions[1].transform.DOScale(Vector3.zero, .25f);
         DesacInflatOrNot(false);
     }
 
@@ -309,31 +311,36 @@ public class Manager : MonoBehaviour
 
         yield return new WaitForSeconds((ShakeAnim.Instance.durationShaking + _actualgrow) / 25);
 
-        DesacInflatOrNot(true);
-        balloon.transform.DOScale(Vector3.one, .5f);
+        if (!hasGameEnded)
+        {
+            DesacInflatOrNot(true);
+            balloon.transform.DOScale(Vector3.one, .5f);
 
 
-        _actualgrow = 10;
-        _choosenNumber = 0;
-        _actualNumber = 0;
+            _actualgrow = 10;
+            _choosenNumber = 0;
+            _actualNumber = 0;
 
-        ChooseRandomNb();
-        ActualizeChoosenNb();
-        if (gameMode == GameMode.Score)
-            StartCoroutine(DisplayHowManyTurnLeft());
-        else
-            StartCoroutine(DisplayHowManyTurnLeft());
+            ChooseRandomNb();
+            ActualizeChoosenNb();
+            if (gameMode == GameMode.Score)
+                StartCoroutine(DisplayHowManyTurnLeft());
+            else
+                ChangeTurn();
+        }
     }
 
     private void EndGame()
     {
-        print("Lose");
         if (gameMode == GameMode.Score)
         {
             nbDeMancheScoreMode--;
 
             if (nbDeMancheScoreMode <= 0)
-                print("Fin dla game ScoreMode");
+            {
+                hasGameEnded = true;
+                StartCoroutine(RestartWholeGame());
+            }
         }
         else if (gameMode == GameMode.Melee)
         {
@@ -342,8 +349,51 @@ public class Manager : MonoBehaviour
 
             StartCoroutine(MakePlayerMeleeDisappear());
             _nbOfPlayers--;
+            if (_nbOfPlayers == 1)
+            {
+                hasGameEnded = true;
+                StartCoroutine(RestartWholeGame());
+            }
         }
         StartCoroutine(ResetGame());
+    }
+
+    IEnumerator RestartWholeGame()
+    {
+        instructions[1].SetActive(true);
+        instructions[1].transform.localScale = Vector3.one;
+
+        if (gameMode == GameMode.Score)
+        {
+            for (int i = 0; i < _nbOfPlayers; i++)
+            {
+                if (stockPlayers[i].GetComponent<PlayerHimself>().actualScore > _maxScore)
+                {
+                    _maxScore = stockPlayers[i].GetComponent<PlayerHimself>().actualScore;
+                    _whichMaxScore = i;
+                }
+            }
+        }
+        else
+        {
+            yield return new WaitForSeconds(1f);
+            _whichMaxScore = 0;
+        }
+
+        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<wave>{stockPlayers[_whichMaxScore].GetComponent<PlayerHimself>().Namee}</wave> {textDisplayWon}";
+        instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(stockPlayers[_whichMaxScore].GetComponent<PlayerHimself>().Colorr)}>{stockPlayers[_whichMaxScore].GetComponent<PlayerHimself>().Namee}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(invisibleText)}>{textDisplayWon}";
+        instructions[2].transform.DOComplete();
+        instructions[2].transform.DOScale(Vector3.one, .7f);
+
+        yield return new WaitForSeconds(7f);
+
+        instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
+        TransiAnim.Instance.MakeTransiOn();
+        yield return new WaitForSeconds(.3f);
+        instructions[2].transform.DOScale(Vector3.zero, .25f);
+        yield return new WaitForSeconds(1f);
+
+        SceneManager.LoadScene(0);
     }
 
     IEnumerator MakePlayerMeleeDisappear()
@@ -434,15 +484,17 @@ public class Manager : MonoBehaviour
         StartCoroutine(AnimDisappear());
         ActualizeChoosenNb();
 
-        //DesacValidateOrNot(true);
         validateGreyButtonNb.transform.localScale = Vector3.one;
         cannotPressValidate = true;
     }
 
     IEnumerator AnimDisappear()
     {
-        yield return new WaitForSeconds(_nbOfPlayers * .3f + .3f * 2);
-        StartCoroutine(DisplayHowManyTurnLeft());
+        yield return new WaitForSeconds(_nbOfPlayers * .3f * 3);
+        if (gameMode == GameMode.Score)
+            StartCoroutine(DisplayHowManyTurnLeft());
+        else
+            ChangeTurn();
     }
 
     public void OnPointerClick(int whichButton)
