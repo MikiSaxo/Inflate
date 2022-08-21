@@ -23,11 +23,13 @@ public class Manager : MonoBehaviour
     private bool hasChooseNbPlayers = false;
     private bool hasChooseNamePlayers = false;
     private bool hasGameEnded = false;
+    private bool hasDiscoverEGG = false;
     private bool cannotPressInflate = false;
     private bool cannotPressValidate = false;
 
     [SerializeField] private TextMeshProUGUI[] choosenNb = null;
-    [SerializeField] private GameObject balloon = null;
+    [SerializeField] private GameObject[] balloon = null;
+    [SerializeField] private GameObject[] licorne = null;
     [SerializeField] private GameObject aroundBalloon = null;
     [SerializeField] private GameObject[] instructions = null;
     [SerializeField] private string textDisplayTurn = null;
@@ -41,6 +43,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject validateGreyButtonNb = null;
     [SerializeField] private GameObject inflateGreyButton = null;
     [SerializeField] private GameObject exploBalloonFX = null;
+    [SerializeField] private Color[] colorsBalloon;
 
     [SerializeField] private PlayerData[] playersData;
 
@@ -133,6 +136,8 @@ public class Manager : MonoBehaviour
     private void ChooseRandomNb()
     {
         _randomNumber = Random.Range(minBalloon, maxBalloon * _nbOfPlayers);
+        minBalloon++;
+        maxBalloon++;
         print("randomNumber : " + _randomNumber);
     }
 
@@ -184,14 +189,15 @@ public class Manager : MonoBehaviour
             if (gameMode == GameMode.Score)
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
 
-            if (_choosenNumber > _lastScore && gameMode == GameMode.Score)
+            if (stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().actualScore > _lastScore && gameMode == GameMode.Score)
             {
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActiCrownOrNot(true);
+                
                 if (_lastKing >= 0)
                     stockPlayers[_lastKing].GetComponent<PlayerHimself>().ActiCrownOrNot(false);
 
                 _lastKing = _whichTurn - 1;
-                _lastScore = _choosenNumber;
+                _lastScore = stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().actualScore;
             }
 
             DesacValidateOrNot(true);
@@ -227,7 +233,7 @@ public class Manager : MonoBehaviour
         float _convertGrow = _actualgrow;
         _convertGrow /= 8;
         Vector3 _grow = new Vector3(_convertGrow, _convertGrow, _convertGrow);
-        balloon.transform.DOScale(_grow, .5f);
+        balloon[0].transform.DOScale(_grow, .5f);
         PunchingBagAnim.Instance.Punch();
     }
 
@@ -283,23 +289,20 @@ public class Manager : MonoBehaviour
             _whichTurn = 1;
 
         stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ItsMyTurn();
-
-        //DesacValidateOrNot(true);
-        //validateGreyButtonNb.transform.localScale = Vector3.one;
-        //cannotPressValidate = true;
-
         StartCoroutine(DisplayWhosTurn(stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Colorr));
     }
 
     private IEnumerator ResetGame()
     {
         DesacInflatOrNot(true);
-        balloon.transform.DOKill();
+        balloon[0].transform.DOKill();
         PunchingBagAnim.Instance.ResetPunch();
 
         yield return new WaitForSeconds(.1f);
 
-        balloon.transform.localScale = Vector3.zero;
+        balloon[0].transform.localScale = Vector3.zero;
+        var _randomColor = Random.Range(0, colorsBalloon.Length);
+        balloon[1].gameObject.GetComponent<Image>().color = colorsBalloon[_randomColor];
         GameObject go = Instantiate(exploBalloonFX, parentFX.transform);
 
         float _convertGrow = _actualgrow;
@@ -314,7 +317,7 @@ public class Manager : MonoBehaviour
         if (!hasGameEnded)
         {
             DesacInflatOrNot(true);
-            balloon.transform.DOScale(Vector3.one, .5f);
+            balloon[0].transform.DOScale(Vector3.one, .5f);
 
 
             _actualgrow = 10;
@@ -345,7 +348,7 @@ public class Manager : MonoBehaviour
         else if (gameMode == GameMode.Melee)
         {
             someoneLose = true;
-            balloon.transform.localScale = Vector3.one;
+            balloon[0].transform.localScale = Vector3.one;
 
             StartCoroutine(MakePlayerMeleeDisappear());
             _nbOfPlayers--;
@@ -478,7 +481,8 @@ public class Manager : MonoBehaviour
         }
 
         hasChooseNbPlayers = true;
-        balloon.transform.DOScale(Vector3.one, 2f);
+        balloon[0].transform.DOScale(Vector3.one, 2f);
+        balloon[1].GetComponent<Image>().color = colorsBalloon[0];
         aroundBalloon.SetActive(true);
 
         StartCoroutine(AnimDisappear());
@@ -535,5 +539,16 @@ public class Manager : MonoBehaviour
         }
 
         cannotPressValidate = _tellMe;
+    }
+
+    public void HasDiscoverEasterEgg()
+    {
+        hasDiscoverEGG = true;
+        
+        GameObject go = Instantiate(exploBalloonFX, parentFX.transform);
+        go.transform.localScale = Vector3.one * 2;
+
+        licorne[0].SetActive(true);
+        licorne[1].SetActive(true);
     }
 }
