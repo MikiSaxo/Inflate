@@ -837,6 +837,7 @@ MonoBehaviour:
   - {fileID: 1914937847}
   - {fileID: 1798853387}
   - {fileID: 644171853}
+  textHowManyTurn: <wave>How many Turn?
   textDisplayTurn: ' it''s your turn !'
   textDisplayTurnLeft: turn left!
   textDisplayWon: has won!
@@ -866,7 +867,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9b77206b181222846baf62e30595dba0, type: 2}
   - {fileID: 11400000, guid: 7a829c60317d0fa4ab0628be073c26e3, type: 2}
   - {fileID: 11400000, guid: c4a6c42d153790c4a93f371aa01f3706, type: 2}
-  nbDeMancheScoreMode: 5
+  nbOfTurn: 5
   howManyPlayers: 6
   minBalloon: 3
   maxBalloon: 8

@@ -23,7 +23,7 @@ public class Manager : MonoBehaviour
     private bool hasChooseNbPlayers = false;
     private bool hasChooseNamePlayers = false;
     private bool hasGameEnded = false;
-    private bool hasDiscoverEGG = false;
+    private bool hasChooseNbOfTurn = false;
     private bool cannotPressInflate = false;
     private bool cannotPressValidate = false;
 
@@ -32,6 +32,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject[] licorne = null;
     [SerializeField] private GameObject aroundBalloon = null;
     [SerializeField] private GameObject[] instructions = null;
+    [SerializeField] private string textHowManyTurn = null;
     [SerializeField] private string textDisplayTurn = null;
     [SerializeField] private string textDisplayTurnLeft = null;
     [SerializeField] private string textDisplayWon = null;
@@ -49,12 +50,12 @@ public class Manager : MonoBehaviour
 
     private List<GameObject> stockPlayers = new List<GameObject>();
 
-    [SerializeField] int nbDeMancheScoreMode = 5;
-    [SerializeField] int howManyPlayers = 0;
+    [SerializeField] private int nbOfTurn = 5;
+    [SerializeField] private int howManyPlayers = 0;
 
     [Header("Random number for Balloon")]
-    [SerializeField] int minBalloon = 0;
-    [SerializeField] int maxBalloon = 0;
+    [SerializeField] private int minBalloon = 0;
+    [SerializeField] private int maxBalloon = 0;
 
     [Header("Buttons Colors")]
     [SerializeField] private Color[] colorsButtons;
@@ -147,7 +148,7 @@ public class Manager : MonoBehaviour
             return;
 
         FX_Inflate.Instance.Start_FX_Inflate();
-        if (hasChooseNbPlayers)
+        if (hasChooseNbPlayers && hasChooseNbOfTurn)
         {
             _choosenNumber++;
             _actualNumber++;
@@ -163,17 +164,27 @@ public class Manager : MonoBehaviour
         }
         else
         {
-            if (_nbOfPlayers >= howManyPlayers)
-                _nbOfPlayers = 0;
+            if (!hasChooseNbOfTurn)
+            {
+                if (_nbOfPlayers >= howManyPlayers)
+                    _nbOfPlayers = 0;
 
-            _nbOfPlayers++;
+                _nbOfPlayers++;
 
-            if (_nbOfPlayers > 1)
-                DesacValidateOrNot(false);
+                if (_nbOfPlayers > 1)
+                    DesacValidateOrNot(false);
+                else
+                {
+                    validateGreyButtonNb.transform.localScale = Vector3.one;
+                    cannotPressValidate = true;
+                }
+            }
             else
             {
-                validateGreyButtonNb.transform.localScale = Vector3.one;
-                cannotPressValidate = true;
+                if (nbOfTurn >= 10)
+                    nbOfTurn = 1;
+
+                nbOfTurn++;
             }
         }
         ActualizeChoosenNb();
@@ -184,7 +195,7 @@ public class Manager : MonoBehaviour
         if (_nbOfPlayers <= 1 || (_choosenNumber == 0 && hasChooseNbPlayers) || cannotPressValidate)
             return;
 
-        if (hasChooseNbPlayers)
+        if (hasChooseNbPlayers && hasChooseNbOfTurn)
         {
             if (gameMode == GameMode.Score)
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
@@ -192,7 +203,7 @@ public class Manager : MonoBehaviour
             if (stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().actualScore > _lastScore && gameMode == GameMode.Score)
             {
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActiCrownOrNot(true);
-                
+
                 if (_lastKing >= 0)
                     stockPlayers[_lastKing].GetComponent<PlayerHimself>().ActiCrownOrNot(false);
 
@@ -206,8 +217,20 @@ public class Manager : MonoBehaviour
         }
         else
         {
-            StartCoroutine(ChoosePlayerName(_nbOfPlayers));
-            DesacInflatOrNot(true);
+            if (!hasChooseNbOfTurn)
+            {
+                if(gameMode == GameMode.Score)
+                    StartCoroutine(ChooseNBOfTurn());
+                else
+                    StartCoroutine(ChoosePlayerName(_nbOfPlayers));
+
+                hasChooseNbOfTurn = true;
+                DesacInflatOrNot(true);
+            }
+            else
+            {
+                StartCoroutine(ChoosePlayerName(_nbOfPlayers));
+            }
         }
 
         ActualizeChoosenNb();
@@ -215,15 +238,23 @@ public class Manager : MonoBehaviour
 
     private void ActualizeChoosenNb()
     {
-        if (hasChooseNbPlayers)
+        if (hasChooseNbPlayers && hasChooseNbOfTurn)
         {
             choosenNb[0].text = _choosenNumber.ToString();
             choosenNb[1].text = _choosenNumber.ToString();
         }
         else
         {
-            choosenNb[0].text = _nbOfPlayers.ToString();
-            choosenNb[1].text = _nbOfPlayers.ToString();
+            if (!hasChooseNbOfTurn)
+            {
+                choosenNb[0].text = _nbOfPlayers.ToString();
+                choosenNb[1].text = _nbOfPlayers.ToString();
+            }
+            else
+            {
+                choosenNb[0].text = nbOfTurn.ToString();
+                choosenNb[1].text = nbOfTurn.ToString();
+            }
         }
     }
 
@@ -257,7 +288,7 @@ public class Manager : MonoBehaviour
 
     private IEnumerator DisplayHowManyTurnLeft()
     {
-        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<bounce><u>{nbDeMancheScoreMode}</u> {textDisplayTurnLeft}";
+        instructions[0].GetComponent<TextMeshProUGUI>().text = $"<bounce><u>{nbOfTurn}</u> {textDisplayTurnLeft}";
         instructions[1].transform.localScale = Vector3.zero;
         instructions[2].transform.DOScale(Vector3.one, .7f);
 
@@ -268,7 +299,6 @@ public class Manager : MonoBehaviour
         yield return new WaitForSeconds(.35f);
 
         ChangeTurn();
-        //StartCoroutine(DisplayWhosTurn(stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().Colorr));
     }
 
     private void ChangeTurn()
@@ -337,9 +367,9 @@ public class Manager : MonoBehaviour
     {
         if (gameMode == GameMode.Score)
         {
-            nbDeMancheScoreMode--;
+            nbOfTurn--;
 
-            if (nbDeMancheScoreMode <= 0)
+            if (nbOfTurn <= 0)
             {
                 hasGameEnded = true;
                 StartCoroutine(RestartWholeGame());
@@ -436,6 +466,28 @@ public class Manager : MonoBehaviour
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi / 2);
 
         DesacValidateOrNot(false);
+    }
+
+    IEnumerator ChooseNBOfTurn()
+    {
+        DesacValidateOrNot(true);
+        ActualizeChoosenNb();
+
+        instructions[0].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
+
+        yield return new WaitForSeconds(.3f);
+
+        instructions[0].transform.DOScale(Vector3.zero, .25f);
+
+        yield return new WaitForSeconds(.35f);
+
+        instructions[0].GetComponent<TextMeshProUGUI>().text = textHowManyTurn;
+        instructions[0].transform.DOScale(Vector3.one, .7f);
+
+        yield return new WaitForSeconds(.7f);
+
+        DesacValidateOrNot(false);
+        DesacInflatOrNot(false);
     }
 
     public void LaunchTransiSpawn()
@@ -543,8 +595,6 @@ public class Manager : MonoBehaviour
 
     public void HasDiscoverEasterEgg()
     {
-        hasDiscoverEGG = true;
-        
         GameObject go = Instantiate(exploBalloonFX, parentFX.transform);
         go.transform.localScale = Vector3.one * 2;
 
