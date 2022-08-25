@@ -31,6 +31,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject[] balloon = null;
     [SerializeField] private GameObject[] licorne = null;
     [SerializeField] private GameObject aroundBalloon = null;
+    [SerializeField] private GameObject backButton = null;
     [SerializeField] private GameObject[] instructions = null;
     [SerializeField] private string textHowManyTurn = null;
     [SerializeField] private string textDisplayTurn = null;
@@ -87,6 +88,7 @@ public class Manager : MonoBehaviour
 
     private void Start()
     {
+        Application.targetFrameRate = 60;
         invisibleText.a = 0;
         TransiAnim.Instance.MakeTransiOff();
     }
@@ -133,7 +135,6 @@ public class Manager : MonoBehaviour
         title[3].SetActive(true);
         title[4].SetActive(false);
     }
-
     private void ChooseRandomNb()
     {
         _randomNumber = Random.Range(minBalloon, maxBalloon * _nbOfPlayers);
@@ -202,10 +203,10 @@ public class Manager : MonoBehaviour
 
             if (stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().actualScore > _lastScore && gameMode == GameMode.Score)
             {
-                stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActiCrownOrNot(true);
-
                 if (_lastKing >= 0)
                     stockPlayers[_lastKing].GetComponent<PlayerHimself>().ActiCrownOrNot(false);
+
+                stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActiCrownOrNot(true);
 
                 _lastKing = _whichTurn - 1;
                 _lastScore = stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().actualScore;
@@ -226,6 +227,7 @@ public class Manager : MonoBehaviour
 
                 hasChooseNbOfTurn = true;
                 DesacInflatOrNot(true);
+                return;
             }
             else
             {
@@ -325,6 +327,10 @@ public class Manager : MonoBehaviour
     private IEnumerator ResetGame()
     {
         DesacInflatOrNot(true);
+
+        validateGreyButtonNb.transform.localScale = Vector3.one;
+        cannotPressValidate = true;
+
         balloon[0].transform.DOKill();
         PunchingBagAnim.Instance.ResetPunch();
 
@@ -417,9 +423,14 @@ public class Manager : MonoBehaviour
         instructions[1].GetComponent<TextMeshProUGUI>().text = $"<wave><color=#{ColorUtility.ToHtmlStringRGBA(stockPlayers[_whichMaxScore].GetComponent<PlayerHimself>().Colorr)}>{stockPlayers[_whichMaxScore].GetComponent<PlayerHimself>().Namee}</color></wave><size=86.5f%><color=#{ColorUtility.ToHtmlStringRGBA(invisibleText)}>{textDisplayWon}";
         instructions[2].transform.DOComplete();
         instructions[2].transform.DOScale(Vector3.one, .7f);
+    }
 
-        yield return new WaitForSeconds(7f);
-
+    public void LaunchReStartGame()
+    {
+        StartCoroutine(ReStartGame());
+    }
+    IEnumerator ReStartGame()
+    {
         instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         TransiAnim.Instance.MakeTransiOn();
         yield return new WaitForSeconds(.3f);
@@ -471,7 +482,6 @@ public class Manager : MonoBehaviour
     IEnumerator ChooseNBOfTurn()
     {
         DesacValidateOrNot(true);
-        ActualizeChoosenNb();
 
         instructions[0].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
 
@@ -481,10 +491,14 @@ public class Manager : MonoBehaviour
 
         yield return new WaitForSeconds(.35f);
 
+        backButton.transform.DOScale(Vector3.one, .7f);
+
         instructions[0].GetComponent<TextMeshProUGUI>().text = textHowManyTurn;
         instructions[0].transform.DOScale(Vector3.one, .7f);
 
-        yield return new WaitForSeconds(.7f);
+        yield return new WaitForSeconds(.35f);
+        ActualizeChoosenNb();
+        yield return new WaitForSeconds(.35f);
 
         DesacValidateOrNot(false);
         DesacInflatOrNot(false);

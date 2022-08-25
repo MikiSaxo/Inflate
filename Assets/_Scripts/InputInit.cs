@@ -28,7 +28,12 @@ public class InputInit : MonoBehaviour
 
     public void ReadInput(string _name)
     {
-        Manager.Instance.ChangePlayerName(index, _name);
+        var namu = _name;
+        
+        if(namu == "")
+            namu = $"Player {index + 1}";
+
+        Manager.Instance.ChangePlayerName(index, namu);
     }
 
     public void OpenKeyboard()
