@@ -18,6 +18,7 @@ public class Manager : MonoBehaviour
     private int _lastKing = -1;
     private int _maxScore = 0;
     private int _whichMaxScore = 0;
+    private int _sureToLeave = 0;
     private bool someoneLose = false;
     private bool hasChooseGameMode = false;
     private bool hasChooseNbPlayers = false;
@@ -31,7 +32,7 @@ public class Manager : MonoBehaviour
     [SerializeField] private GameObject[] balloon = null;
     [SerializeField] private GameObject[] licorne = null;
     [SerializeField] private GameObject aroundBalloon = null;
-    [SerializeField] private GameObject backButton = null;
+    [SerializeField] private GameObject[] backButton = null;
     [SerializeField] private GameObject[] instructions = null;
     [SerializeField] private string textHowManyTurn = null;
     [SerializeField] private string textDisplayTurn = null;
@@ -427,10 +428,15 @@ public class Manager : MonoBehaviour
 
     public void LaunchReStartGame()
     {
-        StartCoroutine(ReStartGame());
+        _sureToLeave++;
+        if (_sureToLeave == 1)
+            StartCoroutine(SureToLeave());
+        else if (_sureToLeave == 2)
+            StartCoroutine(ReStartGame());
     }
     IEnumerator ReStartGame()
     {
+        instructions[2].transform.DOKill();
         instructions[2].transform.DOScale(new Vector3(1.1f, 1.1f, 1.1f), .3f);
         TransiAnim.Instance.MakeTransiOn();
         yield return new WaitForSeconds(.3f);
@@ -438,6 +444,14 @@ public class Manager : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         SceneManager.LoadScene(0);
+    }
+
+    IEnumerator SureToLeave()
+    {
+        backButton[1].transform.DOScale(Vector3.one, .7f);
+        yield return new WaitForSeconds(3f);
+        backButton[1].transform.DOScale(Vector3.zero, .7f);
+        _sureToLeave = 0;
     }
 
     IEnumerator MakePlayerMeleeDisappear()
@@ -474,6 +488,8 @@ public class Manager : MonoBehaviour
         }
 
         TransiAnim.Instance.MakeTransiOff();
+        backButton[0].transform.DOScale(Vector3.one, .7f);
+
         yield return new WaitForSeconds(TransiAnim.Instance.TimeTransi / 2);
 
         DesacValidateOrNot(false);
@@ -490,8 +506,6 @@ public class Manager : MonoBehaviour
         instructions[0].transform.DOScale(Vector3.zero, .25f);
 
         yield return new WaitForSeconds(.35f);
-
-        backButton.transform.DOScale(Vector3.one, .7f);
 
         instructions[0].GetComponent<TextMeshProUGUI>().text = textHowManyTurn;
         instructions[0].transform.DOScale(Vector3.one, .7f);
