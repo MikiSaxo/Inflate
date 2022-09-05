@@ -202,7 +202,7 @@ public class Manager : MonoBehaviour
             if (gameMode == GameMode.Score)
                 stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().ActualizeScore(_choosenNumber);
 
-            if (stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().actualScore > _lastScore && gameMode == GameMode.Score)
+            if (stockPlayers[_whichTurn - 1].GetComponent<PlayerHimself>().actualScore >= _lastScore && gameMode == GameMode.Score)
             {
                 if (_lastKing >= 0)
                     stockPlayers[_lastKing].GetComponent<PlayerHimself>().ActiCrownOrNot(false);
@@ -407,7 +407,7 @@ public class Manager : MonoBehaviour
         {
             for (int i = 0; i < _nbOfPlayers; i++)
             {
-                if (stockPlayers[i].GetComponent<PlayerHimself>().actualScore > _maxScore)
+                if (stockPlayers[i].GetComponent<PlayerHimself>().actualScore >= _maxScore)
                 {
                     _maxScore = stockPlayers[i].GetComponent<PlayerHimself>().actualScore;
                     _whichMaxScore = i;
